@@ -78,7 +78,7 @@ const eventData = [
 
 const SimilarEvent = () => {
   return (
-    <div className="bg-primary md:px-52 py-6">
+    <div className="bg-black md:px-52 py-6">
       <h2 className="text-2xl font-semibold mb-4 text-white mx-8">
         Related Events
       </h2>
@@ -86,7 +86,7 @@ const SimilarEvent = () => {
         {eventData.map((event) => (
           <div
             key={event.id}
-            className="flex-none w-64 bg-primary rounded-lg shadow-lg p-4"
+            className="flex-none w-64 bg-black rounded-lg shadow-lg p-4"
           >
             <img
               src={event.imgSrc}

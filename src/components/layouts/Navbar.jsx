@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Dialog,
@@ -22,6 +22,19 @@ import callsToAction from "../../data/CallToAction";
 const Navbar = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const [userId, setUserId] = useState(null);
+  const [organizerId, setOrganizerId] = useState(null);
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userID');
+    const storedOragnizerId = localStorage.getItem('organizerId');
+    setUserId(storedUserId);
+    setOrganizerId(storedOragnizerId)
+  }, []);
+
+  console.log(organizerId)
+
   return (
     <>
       <div>
@@ -33,7 +46,7 @@ const Navbar = () => {
             <div className="flex lg:flex-1 items-center">
               <a href="/" className="-m-1.5 p-1.5 flex gap-3">
                 <IoLogoPlaystation className="h-8 w-auto text-white" />
-                <p className="text-white mt-1 text-lg">asana spa</p>
+                <p className="text-white mt-1 text-lg">ash</p>
               </a>
             </div>
             <div className="flex lg:hidden">
@@ -49,46 +62,64 @@ const Navbar = () => {
             <PopoverGroup className="hidden lg:flex lg:gap-x-12">
               <Link
                 to="/events"
-                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${
-                  location.pathname === "/events" ||
+                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/events" ||
                   location.pathname === "/single-event"
-                    ? "border-red-700 text-secondary"
-                    : "text-white hover:border-secondary"
-                }`}
+                  ? "border-red-700 text-secondary"
+                  : "text-white hover:border-secondary"
+                  }`}
               >
                 Explore Events
               </Link>
               <Link
                 to="/about"
-                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${
-                  location.pathname === "/about"
-                    ? "border-secondary text-secondary"
-                    : "text-white hover:border-secondary"
-                }`}
+                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/about"
+                  ? "border-secondary text-secondary"
+                  : "text-white hover:border-secondary"
+                  }`}
               >
                 About Us
               </Link>
               <Link
                 to="/blogs"
-                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${
-                  location.pathname === "/blogs"
-                    ? "border-secondary text-secondary"
-                    : "text-white hover:border-secondary"
-                }`}
+                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/blogs"
+                  ? "border-secondary text-secondary"
+                  : "text-white hover:border-secondary"
+                  }`}
               >
                 Blogs
               </Link>
-              <Link
-                to="/auth"
-                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${
-                  location.pathname === "/login"
+              {userId ? (
+                <Link
+                  to="/my-profile"
+                  className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/my-profile"
                     ? "border-secondary text-secondary"
                     : "text-white hover:border-secondary"
-                }`}
+                    }`}
+                >
+                  Profile
+                </Link>
+              ) : (
+                <Link
+                  to="/auth"
+                  className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/login"
+                    ? "border-secondary text-secondary"
+                    : "text-white hover:border-secondary"
+                    }`}
+                >
+                  Login
+                </Link>
+              )}
+              <Link
+                to="/my-tickets"
+                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/my-tickets"
+                  ? "border-secondary text-secondary"
+                  : "text-white hover:border-secondary"
+                  }`}
               >
-                Login
+                My Bookings
               </Link>
-              <Popover className="relative">
+
+              {/* <Popover className="relative">
                 <PopoverButton className="flex items-center gap-x-1 text-base font-semibold leading-6 text-white outline-none hover:text-secondary px-3 py-2 border-b-2 border-transparent hover:border-secondary transition duration-200">
                   More
                   <ChevronDownIcon
@@ -144,18 +175,33 @@ const Navbar = () => {
                     ))}
                   </div>
                 </PopoverPanel>
-              </Popover>
+              </Popover> */}
             </PopoverGroup>
-            <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-              <div className="animated-border rounded-full p-1">
-                <a
-                  href="#"
-                  className="inline-block text-base font-semibold leading-6 text-white px-4 py-2 bg-black rounded-full"
-                >
-                  Launch Events <span aria-hidden="true">&rarr;</span>
-                </a>
-              </div>
-            </div>
+            {
+              organizerId ? (
+                <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+                  <div className="rounded-full p-1">
+                    <a
+                      href="/dashboard"
+                      className="inline-block text-base font-semibold leading-6 text-white px-4 py-2 bg-[#080808] rounded-full"
+                    >
+                      Go to dashboard <span aria-hidden="true">&rarr;</span>
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+                  <div className="rounded-full p-1">
+                    <a
+                      href="/launch-event"
+                      className="inline-block text-base font-semibold leading-6 text-white px-8 py-2 bg-[#080808] rounded-full"
+                    >
+                      Launch Events
+                    </a>
+                  </div>
+                </div>
+              )
+            }
           </nav>
           <Dialog
             open={mobileMenuOpen}
@@ -185,29 +231,44 @@ const Navbar = () => {
                   <div className="space-y-2 py-6">
                     <a
                       href="/events"
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-50"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-800"
                     >
                       Explore Events
                     </a>
                     <a
                       href="#"
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-50"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-800"
                     >
                       About Us
                     </a>
                     <a
                       href="#"
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-50"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-800"
                     >
                       Blogs
                     </a>
-                    <a
-                      href="/auth"
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-50"
-                    >
-                      Login
-                    </a>
-                    <Disclosure as="div" className="-mx-3">
+                    {
+                      userId ? (
+                        <>
+                          <a
+                            href="/my-profile"
+                            className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-800"
+                          >
+                            My Profile
+                          </a>
+                        </>
+                      ) : (
+                        <>
+                          <a
+                            href="/auth"
+                            className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-white hover:bg-gray-800"
+                          >
+                            Login
+                          </a>
+                        </>
+                      )
+                    }
+                    {/* <Disclosure as="div" className="-mx-3">
                       <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-white hover:bg-gray-50">
                         More
                         <ChevronDownIcon
@@ -227,22 +288,39 @@ const Navbar = () => {
                           </DisclosureButton>
                         ))}
                       </DisclosurePanel>
-                    </Disclosure>
+                    </Disclosure> */}
                   </div>
-                  <div className="py-6">
-                    <a
-                      href="#"
-                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-secondary hover:bg-gray-50"
-                    >
-                      Launch Events
-                    </a>
-                  </div>
+                  {
+                    organizerId ? (
+                      <>
+                        <div className="py-6">
+                          <a
+                            href="/dashboard"
+                            className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-secondary hover:bg-gray-50"
+                          >
+                            Switch to Oragnizer
+                          </a>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="py-6">
+                          <a
+                            href="/launch-event"
+                            className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-secondary hover:bg-gray-50"
+                          >
+                            Launch Events
+                          </a>
+                        </div>
+                      </>
+                    )
+                  }
                 </div>
               </div>
             </DialogPanel>
           </Dialog>
-        </header>
-      </div>
+        </header >
+      </div >
     </>
   );
 };

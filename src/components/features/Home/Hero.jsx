@@ -106,16 +106,16 @@ const Hero = () => {
                       <MagicButton
                         title={"Explore Events"}
                         color={"gray-600"}
-                        textColor={"white"}
+                        textColor={"#080808"}
                       />
                     </a>
-                    <a href="/create-event" className="hidden md:inline-block">
+                    {/* <a href="/launch-event" className="hidden md:inline-block">
                       <MagicButton
                         title={"Launch Events"}
                         color={"secondary"}
                         textColor={"white"}
                       />
-                    </a>
+                    </a> */}
                   </div>
                 </div>
               </div>

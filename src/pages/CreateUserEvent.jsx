@@ -1,11 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FaEdit, FaTimes, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTimes } from "react-icons/fa";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import url from "../../constants/url"
+import url from "../constants/url"
 
-const Create = () => {
+const CreateUserEvent = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [eventDescription, setEventDescription] = useState("");
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -13,7 +13,7 @@ const Create = () => {
   const [showValidDates, setShowValidDates] = useState(false);
   const [limit, setLimit] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [oragnizerId, setOragnizerId] = useState(null);
+  const [orgModal, setOrgModal] = useState(false);
 
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -41,8 +41,157 @@ const Create = () => {
   const [minLimit, setMinLimit] = useState("");
   const [maxLimit, setMaxLimit] = useState("")
   const [ticketDescription, setTicketDescription] = useState("");
-  const [isExplore, setIsExplore] = useState(true);
+  const [isExplore, setIsExplore] = useState(false);
+
+  const [userSeverId, setUserServerId] = useState("")
+  const [userOragnizerId, setUserOragnizerId] = useState("")
+  const [userId, setUserId] = useState(null);
+  const [oragnizerId, setOragnizerId] = useState(null);
   const [file, setFile] = useState(null);
+
+  const [step, setStep] = useState(0);
+  const [otpSent, setOtpSent] = useState(false);
+  const [formData, setFormData] = useState({
+    countryCode: '+1',
+    phoneNumber: '',
+    otp: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    businessName: '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const numberWithCode = formData.countryCode + formData.phoneNumber;
+
+  const handleNextStep = async () => {
+    if (step === 1 && !otpSent) {
+      try {
+        const response = await axios.post(`${url}/auth/send-otp`, { phoneNumber: numberWithCode });
+        if (response.data.success) {
+          setOtpSent(true);
+        } else {
+          alert('Error', response.data.message);
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Failed to send OTP');
+      }
+
+    } else if (otpSent) {
+      try {
+        const response = await axios.post(`${url}/auth/verify-otp`, { phoneNumber: numberWithCode, otp: formData.otp });
+
+        if (response.data.success) {
+          const { userID, authToken } = response.data;
+          setUserServerId(userID)
+
+          if (userID && authToken) {
+            localStorage.setItem('userID', userID);
+            localStorage.setItem('authToken', authToken);
+            setStep(2);
+          } else {
+            alert('Error', 'Invalid response data from server.');
+          }
+        } else {
+          alert('Error', response.data.message);
+        }
+      } catch (error) {
+        console.error('Verification failed:', error);
+        alert('Failed to login');
+      }
+    }
+  };
+
+  const handleFinish = async () => {
+    try {
+      const basicInfoResponse = await axios.post(`${url}/auth/basic-info/${userSeverId}`, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+      });
+
+      if (basicInfoResponse.data.success) {
+        const connectedAccountResponse = await axios.post(`${url}/create-connected-account`, {
+          name: formData.businessName,
+          userId: userSeverId
+        });
+
+        if (connectedAccountResponse.data.success) {
+          const { accountLink, organizerId } = connectedAccountResponse.data;
+          setUserOragnizerId(organizerId);
+          localStorage.setItem('organizerId', organizerId);
+          localStorage.setItem('accountLink', accountLink);
+
+          alert("Success", "Profile Created Successfully!");
+          setTimeout(() => {
+            handleAddEvent();
+          }, 500);
+          setStep(0);
+        } else {
+          alert("Error", connectedAccountResponse.data.message || "Failed to create connected account!");
+          console.log("error of connect")
+        }
+      } else {
+        alert("Error", basicInfoResponse.data.message || "Failed to update profile!");
+        console.log("error of basic")
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      alert("Error", "An error occurred. Please try again.");
+    }
+  };
+
+  const handleOrgModal = () => {
+    setOrgModal(true)
+  }
+
+  const handleOrgFinish = async () => {
+    try {
+      const response = await axios.post(`${url}/create-connected-account`, {
+        name: formData.businessName,
+        userId: userId
+      });
+      if (response.data.success) {
+        const { accountLink, organizerId } = response.data;
+        setUserOragnizerId(organizerId);
+        localStorage.setItem('organizerId', organizerId);
+        localStorage.setItem('accountLink', accountLink);
+
+        alert("Profile Created Successfully!");
+        setOrgModal(false)
+        setOragnizerId(organizerId)
+      } else {
+        alert("Error", response.data.message || "Failed to create connected account!");
+        console.log("error of connect")
+      }
+    } catch (error) {
+      console.error('Adding Organizer:', error);
+    }
+  }
+
+
+  useEffect(() => {
+    const loadFromLocalStorage = () => {
+      const storedUserId = localStorage.getItem('userID');
+      const storedUserOrganizerId = localStorage.getItem('organizerId');
+      setUserId(storedUserId);
+      setOragnizerId(storedUserOrganizerId);
+    };
+    loadFromLocalStorage();
+    const handleStorageChange = () => {
+      loadFromLocalStorage();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [userOragnizerId]);
 
   const getPlainText = (html) => {
     const parser = new DOMParser();
@@ -137,22 +286,6 @@ const Create = () => {
     ticket_description: ticket.ticketDescription
   }));
 
-  useEffect(() => {
-    const loadFromLocalStorage = () => {
-      const storedUserOrganizerId = localStorage.getItem('organizerId');
-      setOragnizerId(storedUserOrganizerId);
-    };
-    loadFromLocalStorage();
-    const handleStorageChange = () => {
-      loadFromLocalStorage();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
   const handleAddEvent = async (e) => {
     e.preventDefault();
 
@@ -196,26 +329,44 @@ const Create = () => {
     }
   };
 
-
-
-  const handleDeleteClick = (indexToDelete) => {
-    setTickets((prevTickets) => prevTickets.filter((_, index) => index !== indexToDelete));
-  }
-
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="flex flex-col p-10">
         <div className="flex justify-between items-center">
-          <a href="/org-event" className="text-xl font-semibold underline cursor-pointer">
+          <a href="/" className="text-xl font-semibold underline cursor-pointer">
             Cancel
           </a>
 
-          <button
-            onClick={handleAddEvent}
-            className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
-          >
-            Create Event
-          </button>
+          {
+            !userId && !oragnizerId ? (
+              <>
+                <button
+                  onClick={() => setStep(1)}
+                  className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  Create Event
+                </button>
+              </>
+            ) : userId && !oragnizerId ? (
+              <>
+                <button
+                  onClick={handleOrgModal}
+                  className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  Create Event
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleAddEvent}
+                  className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  Create Event
+                </button>
+              </>
+            )
+          }
         </div>
 
         <div className="flex justify-center">
@@ -302,7 +453,7 @@ const Create = () => {
                   onChange={(e) => setAddress(e.target.value)}
                 />
               </div>
-              <div className="flex items-center space-x-4 mt-10">
+              <div className="flex items-center space-x-4 mt-10 hidden">
                 <h1 className="text-white">Show Event on Explore</h1>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -392,18 +543,9 @@ const Create = () => {
                       <h3 className="text-xl font-semibold">{ticket.ticketName}</h3>
                       <p className="text-lg mt-3">${ticket.price}</p>
                     </div>
-                    <div className="ml-4 flex space-x-2">
-                      <button
-                        onClick={() => handleEditClick(ticket, index)}
-                        className="bg-gray-300 text-black p-2 rounded-full hover:bg-gray-400 transition-colors"
-                      >
+                    <div className="ml-4">
+                      <button onClick={() => handleEditClick(ticket, index)} className="bg-gray-300 text-black p-2 rounded-full hover:bg-gray-400 transition-colors">
                         <FaEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(index)}
-                        className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
-                      >
-                        <FaTrash />
                       </button>
                     </div>
                   </div>
@@ -849,9 +991,158 @@ const Create = () => {
             )}
           </div>
         </div>
+        <div className={step > 0 ? 'blur-background' : ''}>
+          {step > 0 && (
+            <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+              <div className="bg-black w-full max-w-lg p-6 rounded-lg shadow-lg relative border border-gray-600">
+                {step === 1 && (
+                  <div>
+                    <h2 className="text-xl font-bold mb-4">Login</h2>
+                    <div className="flex gap-2 mb-4">
+                      <select
+                        name="countryCode"
+                        value={formData.countryCode}
+                        onChange={handleChange}
+                        className="border-b outline-none border-gray-800 p-2 w-1/3 bg-black"
+                      >
+                        <option value="+1">+1</option>
+                        <option value="+91">+91</option>
+                        <option value="+44">+44</option>
+                      </select>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        placeholder="Phone Number"
+                        className="border-b outline-none border-gray-800 p-2 flex-1 bg-black"
+                      />
+                      <button
+                        onClick={handleNextStep}
+                        className="bg-gray-500 text-white font-semibold px-4 rounded-md hover:bg-gray-600 transition-colors"
+                      >
+                        OTP
+                      </button>
+                    </div>
+                    {otpSent && (
+                      <input
+                        type="text"
+                        name="otp"
+                        value={formData.otp}
+                        onChange={handleChange}
+                        placeholder="Enter OTP"
+                        className="border-b outline-none border-gray-800 p-2 w-full mb-4 bg-black"
+                      />
+                    )}
+                    {otpSent && (
+                      <button
+                        onClick={handleNextStep}
+                        className="bg-white text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-200 transition-colors w-full"
+                      >
+                        Login
+                      </button>
+                    )}
+                  </div>
+                )}
+                {step === 2 && (
+                  <div>
+                    <h2 className="text-xl font-bold mb-4">Basic Details</h2>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      placeholder="First Name"
+                      className="border-b p-2 outline-none border-gray-800 bg-black w-full mb-4"
+                    />
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      placeholder="Last Name"
+                      className="border-b p-2 outline-none border-gray-800 bg-black w-full mb-4"
+                    />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Email ID"
+                      className="border-b p-2 outline-none border-gray-800 bg-black w-full mb-4"
+                    />
+                    <input
+                      type="text"
+                      name="businessName"
+                      value={formData.businessName}
+                      onChange={handleChange}
+                      placeholder="Business Name"
+                      className="border-b p-2 outline-none border-gray-800 bg-black w-full mb-4"
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleFinish}
+                        className="bg-green-500 text-black font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
+                      >
+                        Finish & Create Event
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {step === 1 && (
+                  <>
+                    <button
+                      onClick={() => setStep(0)}
+                      className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                    >
+                      ✖
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <div>
+          {orgModal && (
+            <>
+              <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+                <div className="bg-black w-full max-w-lg p-6 rounded-lg shadow-lg relative border border-gray-600">
+                  <div>
+                    <h2 className="text-xl font-bold mb-4">Business Details</h2>
+                    <input
+                      type="text"
+                      name="businessName"
+                      value={formData.businessName}
+                      onChange={handleChange}
+                      placeholder="Business Name"
+                      className="border-b p-2 outline-none border-gray-800 bg-black w-full mb-4"
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleOrgFinish}
+                        className="bg-green-500 text-black font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
+                      >
+                        Finish & Create Event
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setOrgModal(false)}
+                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                  >
+                    ✖
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
       </div>
     </div>
   );
 };
 
-export default Create;
+export default CreateUserEvent;

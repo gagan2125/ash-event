@@ -1,3 +1,8 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import url from "../../../constants/url";
+
+
 const people = [
   {
     name: "Leslie Alexander",
@@ -54,52 +59,92 @@ const people = [
 ];
 
 const TicketList = () => {
+  const [book, setBook] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const loadFromLocalStorage = () => {
+      const storedUserId = localStorage.getItem('userID');
+      setUserId(storedUserId);
+    };
+    loadFromLocalStorage();
+    const handleStorageChange = () => {
+      loadFromLocalStorage();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  const fetchBook = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${url}/get-booking-lists/${userId}`);
+      setBook(response.data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBook();
+  }, [userId]);
+
+  console.log(book)
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   return (
     <>
-      <div className="px-10 md:px-72">
-        <h3 className="text-white text-3xl mt-5">My Bookings</h3>
-        <ul role="list" className="divide-y divide-gray-800 mt-6">
-          {people.map((person) => (
-            <li
-              key={person.email}
-              className="flex justify-between gap-x-6 py-5"
-            >
-              <div className="flex min-w-0 gap-x-4">
-                <img
-                  alt=""
-                  src={person.imageUrl}
-                  className="h-12 w-12 flex-none rounded-full bg-gray-50"
-                />
-                <div className="min-w-0 flex-auto">
-                  <p className="text-sm font-semibold leading-6 text-gray-100">
-                    {person.name}
-                  </p>
-                  <p className="mt-1 truncate text-xs leading-5 text-gray-400">
-                    {person.email}
-                  </p>
-                </div>
-              </div>
-              <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
-                <p className="text-sm leading-6 text-gray-300">{person.role}</p>
-                {person.lastSeen ? (
-                  <p className="mt-1 text-xs leading-5 text-gray-400">
-                    Last seen{" "}
-                    <time dateTime={person.lastSeenDateTime}>
-                      {person.lastSeen}
-                    </time>
-                  </p>
-                ) : (
-                  <div className="mt-1 flex items-center gap-x-1.5">
-                    <div className="flex-none rounded-full bg-emerald-500/20 p-1">
-                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+      <div>
+        <div className="bg-primary px-10 md:px-72">
+          <h3 className="text-white text-2xl mt-5">My Bookings</h3>
+          {book.length === 0 ? (
+            <p className="text-gray-400 text-center mt-10">No bookings are present.</p>
+          ) : (
+            <ul role="list" className="divide-y divide-gray-800 mt-6">
+              {book.map((item) => (
+                <a href={`qr-ticket/${item._id}`} key={item._id} className="flex justify-between gap-x-6 py-5">
+                  <div className="flex min-w-0 gap-x-4">
+                    <img
+                      alt=""
+                      src={item.party_id.flyer}
+                      className="h-12 w-12 flex-none rounded-full bg-gray-50"
+                    />
+                    <div className="min-w-0 flex-auto">
+                      <p className="text-sm font-semibold leading-6 text-gray-100">
+                        {item.party_id.event_name}
+                      </p>
+                      <p className="mt-1 truncate text-xs leading-5 text-gray-400">
+                        {item.party_id.venue_name}
+                      </p>
                     </div>
-                    <p className="text-xs leading-5 text-gray-200">Today</p>
                   </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+                  <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
+                    <p className="text-sm leading-6 text-gray-300">${item.amount / 100}</p>
+                    <p className="mt-1 text-xs leading-5 text-gray-400">
+                      <time dateTime={item.party_id.start_date}>
+                        {new Date(item.party_id.start_date).toLocaleString("en-US", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true, // For AM/PM format
+                        })}
+                      </time>
+                    </p>
+                  </div>
+                </a>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </>
   );

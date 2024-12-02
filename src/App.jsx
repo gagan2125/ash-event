@@ -22,41 +22,63 @@ import Profile from "./pages/organizer/Profile";
 import Analytics from "./pages/organizer/Analytics";
 import Makert from "./pages/organizer/Makert";
 import Checkout from "./pages/Checkout";
+import BasicDetails from "./pages/BasicDetails";
+import CreateUserEvent from "./pages/CreateUserEvent";
+import Edit from "./pages/organizer/Edit";
+import OnboardingSuccess from "./pages/organizer/OnboardingSuccess";
+import { stripePromise } from "./constants/stripePromise";
+import { Elements } from "@stripe/react-stripe-js";
+import QrTicket from "./pages/QrTicket";
+import Eventinfo from "./pages/organizer/Eventinfo";
+import MyProfile from "./pages/MyProfile";
 
 function App() {
   const location = useLocation();
 
+  const hideNavbarAndFooterPaths = [
+    "/create-ticket",
+    "/launch-event",
+    "/basic-info",
+    "/auth",
+    "/dashboard",
+    "/org-event",
+    "/create-event",
+    "/create-event-user",
+    "/finance",
+    "/profile",
+    "/analytics",
+    "/market",
+    "/edit-event",
+    '/onboarding-success',
+    '/qr-ticket',
+    '/event-info',
+  ];
+
+  const shouldHideNavbarAndFooter = hideNavbarAndFooterPaths.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
   return (
     <div className="h-screen bg-primary">
-      {location.pathname !== "/create-ticket" &&
-        location.pathname !== "/launch-event" &&
-        location.pathname !== "/auth" &&
-        location.pathname !== "/dashboard" &&
-        location.pathname !== "/org-event" &&
-        location.pathname !== "/create-event" &&
-        location.pathname !== "/finance" &&
-        location.pathname !== "/profile" &&
-        location.pathname !== "/analytics" &&
-        location.pathname !== "/market" && <Promote />}
-      {location.pathname !== "/launch-event" &&
-        location.pathname !== "/auth" &&
-        location.pathname !== "/dashboard" &&
-        location.pathname !== "/org-event" &&
-        location.pathname !== "/create-event" &&
-        location.pathname !== "/finance" &&
-        location.pathname !== "/profile" &&
-        location.pathname !== "/analytics" &&
-        location.pathname !== "/market" && <Navbar />}
+      {!shouldHideNavbarAndFooter && <Promote />}
+      {!shouldHideNavbarAndFooter && <Navbar />}
       <Routes>
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<Events />} />
-        <Route path="/single-event" element={<SingleEvent />} />
+        <Route path="/single-event/:id/:name" element={<SingleEvent />} />
         <Route path="/my-tickets" element={<MyTickets />} />
         <Route path="/payment" element={<PaymentStripe />} />
         <Route path="/launch-event" element={<LaunchEvent />} />
         <Route path="/create-ticket" element={<Ticketed />} />
-        <Route path="/checkout" element={<Checkout />} />
+        <Route
+          path="/checkout"
+          element={
+            <Elements stripe={stripePromise}>
+              <Checkout />
+            </Elements>
+          }
+        />
         <Route path="/about" element={<About />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/login" element={<Login />} />
@@ -67,17 +89,15 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/market" element={<Makert />} />
+        <Route path="/basic-info" element={<BasicDetails />} />
+        <Route path="/create-event-user" element={<CreateUserEvent />} />
+        <Route path="/edit-event/:id" element={<Edit />} />
+        <Route path="/qr-ticket/:id" element={<QrTicket />} />
+        <Route path="/onboarding-success/:accountId" element={<OnboardingSuccess />} />
+        <Route path="/event-info/:id" element={<Eventinfo />} />
+        <Route path="/my-profile" element={<MyProfile />} />
       </Routes>
-      {location.pathname !== "/create-ticket" &&
-        location.pathname !== "/launch-event" &&
-        location.pathname !== "/auth" &&
-        location.pathname !== "/dashboard" &&
-        location.pathname !== "/org-event" &&
-        location.pathname !== "/create-event" &&
-        location.pathname !== "/finance" &&
-        location.pathname !== "/profile" &&
-        location.pathname !== "/analytics" &&
-        location.pathname !== "/market" && <Footer />}
+      {!shouldHideNavbarAndFooter && <Footer />}
     </div>
   );
 }

@@ -1,7 +1,9 @@
-/* eslint-disable no-undef */
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: [
+    "./index.html", 
+    "./src/**/*.{js,ts,jsx,tsx}"
+  ],
   theme: {
     extend: {
       animation: {
@@ -11,11 +13,11 @@ export default {
       },
       colors: {
         primary: {
-          DEFAULT: "#000",
+          DEFAULT: "#111111",
           100: "#1a1612",
         },
         secondary: {
-          DEFAULT: "#B90E0A",
+          DEFAULT: "#5e00cf",
         },
       },
       keyframes: {
@@ -38,5 +40,5 @@ export default {
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [], // Ensure the plugin is loaded
 };

@@ -1,23 +1,65 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
+import url from "../constants/url";
+import axios from "axios";
 
-const Auth = () => {
+const Auth = ({ navigation }) => {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [selectedCountryCode, setSelectedCountryCode] = useState('+1');
 
-  const handleSendOtp = () => {
-    setOtpSent(true);
+  const numberWithCode = selectedCountryCode + phoneNumber;
+
+  const handleSendOtp = async () => {
+    try {
+      const response = await axios.post(`${url}/auth/send-otp`, { phoneNumber: numberWithCode });
+      if (response.data.success) {
+        setOtpSent(true);
+      } else {
+        alert('Error', response.data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Failed to send OTP');
+    }
+  };
+
+  const handleVerify = async () => {
+    try {
+      const response = await axios.post(`${url}/auth/verify-otp`, { phoneNumber: numberWithCode, otp });
+
+      if (response.data.success) {
+        const { userID, authToken } = response.data;
+
+        if (userID && authToken) {
+          localStorage.setItem('userID', userID);
+          localStorage.setItem('authToken', authToken);
+          window.location.href = "/basic-info"
+        } else {
+          alert('Error', 'Invalid response data from server.');
+        }
+      } else {
+        alert('Error', response.data.message);
+      }
+    } catch (error) {
+      console.error('Verification failed:', error);
+      alert('Failed to login');
+    }
   };
 
   return (
-    <div className="min-h-screen flex justify-center p-4 py-20">
-      <div className="w-full max-w-lg  p-6 rounded-lg shadow-md">
-        <h2 className="text-3xl font-semibold text-white mb-10">
-          Login / Register
-        </h2>
+    <div className="h-screen flex justify-center p-4 py-20">
+      <div className="w-full max-w-lg p-6 rounded-lg shadow-md">
+        <h2 className="text-3xl font-semibold text-white mb-10">Login / Register</h2>
 
         <h5 className="text-white mb-2">Mobile Number</h5>
         <div className="flex items-center space-x-3 mb-4">
-          <select className="bg-black  border-b border-gray-300  p-2 text-gray-200 outline-none">
+          <select
+            className="form-select bg-primary text-gray-200 border-b border-gray-300 p-2 outline-none"
+            value={selectedCountryCode}
+            onChange={(e) => setSelectedCountryCode(e.target.value)}
+          >
             <option value="+1">+1</option>
             <option value="+91">+91</option>
             <option value="+44">+44</option>
@@ -26,11 +68,13 @@ const Auth = () => {
           <input
             type="text"
             placeholder="eg. 9876543210"
-            className="flex-1 border-b bg-black border-gray-300  p-2 text-white outline-none"
+            className="form-input flex-1 bg-primary text-white border-b-2 border-gray-300 p-2 outline-none focus:ring-0"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
           />
           <button
             onClick={handleSendOtp}
-            className="bg-[#2c2c2c] text-white px-4 py-2 rounded-md hover:bg-[#2c2c2c] transition"
+            className="bg-[#080808] text-white px-4 py-2 rounded-md hover:bg-[#0c0c0c] transition"
           >
             OTP
           </button>
@@ -45,12 +89,14 @@ const Auth = () => {
               <input
                 type="text"
                 placeholder="Enter OTP"
-                className="w-full border-b bg-black border-gray-300 p-2 text-gray-700 outline-none"
+                className="form-input w-full bg-primary text-white border-b-2 border-gray-300 p-2 outline-none focus:ring-0"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
               />
             </div>
-            <a className="w-full bg-white text-black py-2 px-4 rounded-lg font-bold hover:bg-gray-200 transition">
+            <button className="w-full bg-white text-primary py-2 px-4 rounded-lg font-bold hover:bg-gray-200 transition" onClick={handleVerify}>
               Login / Register
-            </a>
+            </button>
           </>
         )}
       </div>

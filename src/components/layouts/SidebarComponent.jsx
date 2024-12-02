@@ -44,7 +44,7 @@ const SidebarComponent = () => {
           icon={<BadgeDollarSign size={20} />}
           text="Finance"
           link="/finance"
-          active={location.pathname === "/finance"}
+          active={location.pathname === "/finance" || location.pathname === "/event-info"}
         />
         <div className="my-8"></div>
         <SidebarItem

@@ -1,14 +1,18 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SidebarComponent from "../../components/layouts/SidebarComponent";
 import { FaEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
 import { PiDotsThreeVertical } from "react-icons/pi";
+import url from "../../constants/url"
 
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import axios from "axios";
 
 const OrgEvent = () => {
   const [activeTab, setActiveTab] = useState("All");
+  const [events, setEvents] = useState([]);
+  const [oragnizerId, setOragnizerId] = useState(null);
 
   const cards = [
     { title: "Total Events", count: "25" },
@@ -76,9 +80,48 @@ const OrgEvent = () => {
     },
   ];
 
+  useEffect(() => {
+    const loadFromLocalStorage = () => {
+      const storedUserOrganizerId = localStorage.getItem('organizerId');
+      setOragnizerId(storedUserOrganizerId);
+    };
+    loadFromLocalStorage();
+    const handleStorageChange = () => {
+      loadFromLocalStorage();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(`${url}/event/get-event-by-organizer-id/${oragnizerId}`);
+      setEvents(response.data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [oragnizerId]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear().toString().slice(-2);
+    const time = date.toTimeString().slice(0, 5); // Extract HH:mm
+    return `${day} ${month} ${year} ${time}`;
+  };
+
+
   return (
     <>
-      <div className="flex h-screen">
+      <div className="flex h-screen bg-black">
         <SidebarComponent />
         <div className="flex-1 flex flex-col p-10 overflow-y-auto no-scrollbar">
           <div className="flex justify-between items-center mb-4">
@@ -120,11 +163,10 @@ const OrgEvent = () => {
               {tabs.map((tab) => (
                 <button
                   key={tab}
-                  className={`py-2 px-4 text-md font-medium rounded-md transition-colors ${
-                    activeTab === tab
-                      ? "bg-white text-black"
-                      : "text-gray-400 hover:bg-gray-800"
-                  }`}
+                  className={`py-2 px-4 text-md font-medium rounded-md transition-colors ${activeTab === tab
+                    ? "bg-white text-black"
+                    : "text-gray-400 hover:bg-gray-800"
+                    }`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab}
@@ -147,54 +189,47 @@ const OrgEvent = () => {
                     </div>
                   </div>
                 </div>
-                <div className="-mx-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {cardsData.map((card) => (
-                    <div
-                      key={card.id}
-                      className="max-w-sm p-4 bg-[#0a0a0a] shadow-md rounded-lg hover:border mb-5 cursor-pointer hover:border-gray-800 flex flex-col sm:flex-row items-start sm:items-start space-y-4 sm:space-y-0 sm:space-x-4"
-                    >
-                      <div className="w-24 h-24 bg-gray-200 rounded-md flex-shrink-0">
-                        <img
-                          src={card.image}
-                          alt={card.title}
-                          className="w-full h-full object-cover rounded-md"
-                        />
-                      </div>
-
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-200">
-                          {card.title}
-                        </h3>
-                        <p className="text-sm text-gray-400 mt-1">
-                          Price: {card.price}
-                        </p>
-                        <div className="text-sm text-gray-400 mt-2">
-                          <p>{card.startDate}</p>
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0">
-                        <button className="text-white hover:text-white px-3">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="2"
-                            stroke="currentColor"
-                            className="w-6 h-6"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M12 6v.01M12 12v.01M12 18v.01"
-                            />
-                          </svg>
-                        </button>
-                        <p className="text-sm text-black mt-10 py-1 px-3 font-semibold bg-gray-400 rounded-full">
-                          {card.status}
-                        </p>
-                      </div>
+                <div className="-mx-8">
+                  {events.length === 0 ? (
+                    <div className="text-center text-gray-400 py-10">
+                      <p className="text-lg">No events are available</p>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                      {events.map((card) => (
+                        <a
+                          href={`/edit-event/${card._id}`}
+                          key={card._id}
+                          className="max-w-sm p-4 bg-[#0a0a0a] shadow-md rounded-lg hover:border mb-5 cursor-pointer hover:border-gray-800 flex flex-col sm:flex-row items-start sm:items-start space-y-4 sm:space-y-0 sm:space-x-4"
+                        >
+                          <div className="w-24 h-24 bg-gray-200 rounded-md flex-shrink-0">
+                            <img
+                              src={card.flyer}
+                              alt={card.event_name}
+                              className="w-full h-full object-cover rounded-md"
+                            />
+                          </div>
+
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-gray-200">
+                              {card.event_name}
+                            </h3>
+                            <p className="text-sm text-gray-400 mt-1">
+                              Price: {card.ticket_start_price}
+                            </p>
+                            <div className="text-sm text-gray-400 mt-2">
+                              <p>{formatDate(card.start_date)}</p>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <button className="text-gray-500 hover:text-white">
+                              {card.explore === 'NO' ? "Draft" : "Live"}
+                            </button>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             )}

@@ -1,11 +1,21 @@
 /* eslint-disable no-unused-vars */
-import React from "react";
+import React, { useState } from "react";
 import SidebarComponent from "../../components/layouts/SidebarComponent";
 
 const Profile = () => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e) => {
+    e.preventDefault()
+    navigator.clipboard.writeText(`http://localhost:5173/`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+
   return (
     <>
-      <div className="flex h-screen">
+      <div className="flex h-screen bg-black">
         <SidebarComponent />
         <div className="flex-1 flex flex-col p-10">
           <div className="flex justify-between items-center mb-4">
@@ -84,9 +94,7 @@ const Profile = () => {
                         <h3 className="text-white text-3xl flex items-center gap-x-2">
                           Bobs Bar Party
                           <button
-                            onClick={() =>
-                              navigator.clipboard.writeText("Bobs Bar Party")
-                            }
+                            onClick={handleCopy}
                             className="p-1 rounded hover:bg-gray-700 focus:outline-none"
                             aria-label="Copy text"
                           >
