@@ -5,6 +5,8 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import url from "../../constants/url"
 import { useParams } from "react-router-dom";
+import { DownOutlined } from '@ant-design/icons';
+import { Dropdown, Space } from 'antd';
 
 const Edit = () => {
     const { id } = useParams()
@@ -47,6 +49,39 @@ const Edit = () => {
     const [ticketDescription, setTicketDescription] = useState("");
     const [isExplore, setIsExplore] = useState(true);
     const [file, setFile] = useState(null);
+    const [accountId, setAccountId] = useState("");
+
+    const items = [
+        ...(accountId
+            ? [
+                {
+                    label: 'Make Live',
+                    key: 'live',
+                },
+            ]
+            : []),
+        {
+            label: 'Update as Draft',
+            key: 'draft',
+        },
+    ];
+
+    useEffect(() => {
+        const loadFromLocalStorage = () => {
+            const storedAccountID = localStorage.getItem("accountId");
+            setAccountId(storedAccountID || "");
+        };
+        loadFromLocalStorage();
+
+        const handleStorageChange = () => {
+            loadFromLocalStorage();
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+        };
+    }, []);
 
     const handleDeleteEvent = async () => {
         try {
@@ -182,8 +217,8 @@ const Edit = () => {
         };
     }, []);
 
-    const handleUpdateEvent = async (e) => {
-        e.preventDefault();
+    const handleUpdateEvent = async (isExplore) => {
+        //e.preventDefault();
         const formData = new FormData();
         formData.append('organizer_id', oragnizerId);
         formData.append('event_name', name || event.event_name);
@@ -228,7 +263,6 @@ const Edit = () => {
         }
     };
 
-
     const handleDeleteClick = (indexToDelete) => {
         setTickets((prevTickets) => prevTickets.filter((_, index) => index !== indexToDelete));
     }
@@ -248,28 +282,50 @@ const Edit = () => {
         fetchEvent();
     }, []);
 
+    const handleMenuClick = ({ key }) => {
+        if (key === 'live') {
+            handleUpdateEvent(true);
+        } else if (key === 'draft') {
+            handleUpdateEvent(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-black text-white">
             <div className="flex flex-col p-10">
                 <div className="flex justify-between items-center">
                     <a href="/org-event" className="text-xl font-semibold underline cursor-pointer">
-                        Cancel
+                        Back
                     </a>
 
                     <div className="flex space-x-4">
                         <button
                             onClick={() => setIsDeleteModalOpen(true)}
-                            className="bg-red-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-600 transition-colors"
+                            className="bg-red-500 text-white text-sm font-md py-2 px-4 rounded-md hover:bg-red-600 transition-colors"
                         >
-                            Delete Event
+                            Cancel Event
                         </button>
 
-                        <button
+                        {/* <button
                             onClick={handleUpdateEvent}
                             className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
                         >
                             Update Event
-                        </button>
+                        </button> */}
+                        <Dropdown
+                            className="bg-gray-300 text-black text-sm font-md py-1 px-2 rounded-md hover:bg-gray-400 transition-colors"
+                            menu={{
+                                items,
+                                onClick: handleMenuClick,
+                            }}
+                        >
+                            <button>
+                                <Space>
+                                    Update Event
+                                    <DownOutlined />
+                                </Space>
+                            </button>
+                        </Dropdown>
                     </div>
                 </div>
                 {isDeleteModalOpen && (

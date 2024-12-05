@@ -46,7 +46,7 @@ const Navbar = () => {
             <div className="flex lg:flex-1 items-center">
               <a href="/" className="-m-1.5 p-1.5 flex gap-3">
                 <IoLogoPlaystation className="h-8 w-auto text-white" />
-                <p className="text-white mt-1 text-lg">ash</p>
+                <p className="text-white mt-1 text-lg">avenue</p>
               </a>
             </div>
             <div className="flex lg:hidden">
@@ -109,15 +109,17 @@ const Navbar = () => {
                   Login
                 </Link>
               )}
-              <Link
-                to="/my-tickets"
-                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/my-tickets"
-                  ? "border-secondary text-secondary"
-                  : "text-white hover:border-secondary"
-                  }`}
-              >
-                My Bookings
-              </Link>
+              {userId ? (
+                <Link
+                  to="/my-tickets"
+                  className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/my-tickets"
+                    ? "border-secondary text-secondary"
+                    : "text-white hover:border-secondary"
+                    }`}
+                >
+                  My Bookings
+                </Link>
+              ) : ""}
 
               {/* <Popover className="relative">
                 <PopoverButton className="flex items-center gap-x-1 text-base font-semibold leading-6 text-white outline-none hover:text-secondary px-3 py-2 border-b-2 border-transparent hover:border-secondary transition duration-200">

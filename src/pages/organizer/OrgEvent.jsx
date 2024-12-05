@@ -4,6 +4,9 @@ import SidebarComponent from "../../components/layouts/SidebarComponent";
 import { FaEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
 import { PiDotsThreeVertical } from "react-icons/pi";
 import url from "../../constants/url"
+import { BiDotsVerticalRounded } from "react-icons/bi";
+import { DownOutlined, SettingOutlined } from '@ant-design/icons';
+import { Dropdown, Space } from 'antd';
 
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -14,11 +17,25 @@ const OrgEvent = () => {
   const [events, setEvents] = useState([]);
   const [oragnizerId, setOragnizerId] = useState(null);
 
-  const cards = [
-    { title: "Total Events", count: "25" },
-    { title: "Total Earnings", count: "$3000" },
-    { title: "Total Payout", count: "$2500" },
+  const items = [
+    {
+      key: '1',
+      label: 'Change Status',
+      extra: '⌘P',
+    },
+    {
+      key: '2',
+      label: 'Settings',
+      extra: '⌘S',
+    },
   ];
+
+  const cards = [
+    { title: "Total Live Events", count: events.filter(event => event.explore === "YES").length },
+    { title: "Total Draft Events", count: events.filter(event => event.explore === "NO").length },
+    { title: "Total Past Events", count: 0 },
+  ];
+
   const tabs = ["All", "Live", "Past", "Draft", "Cancelled"];
 
   const cardsData = [
@@ -182,7 +199,7 @@ const OrgEvent = () => {
                     <input
                       type="text"
                       className="w-full px-4 py-2 pl-10 bg-black border border-[#191919] text-gray-200 rounded-md outline-none"
-                      placeholder="Search events..."
+                      placeholder="Search all events..."
                     />
                     <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                       <FaSearch className="w-4 h-4 text-gray-500" />
@@ -195,35 +212,44 @@ const OrgEvent = () => {
                       <p className="text-lg">No events are available</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
                       {events.map((card) => (
                         <a
-                          href={`/edit-event/${card._id}`}
+                          href={`/event-info/${card._id}`}
                           key={card._id}
-                          className="max-w-sm p-4 bg-[#0a0a0a] shadow-md rounded-lg hover:border mb-5 cursor-pointer hover:border-gray-800 flex flex-col sm:flex-row items-start sm:items-start space-y-4 sm:space-y-0 sm:space-x-4"
+                          className="p-4 bg-[#0a0a0a] shadow-md rounded-lg hover:border mb-5 cursor-pointer hover:border-gray-800 flex flex-col space-y-2"
                         >
-                          <div className="w-24 h-24 bg-gray-200 rounded-md flex-shrink-0">
+                          <div className="w-full h-48 bg-gray-200 rounded-md overflow-hidden">
                             <img
                               src={card.flyer}
                               alt={card.event_name}
-                              className="w-full h-full object-cover rounded-md"
+                              className="w-full h-full object-cover"
                             />
                           </div>
-
-                          <div className="flex-1">
+                          <div className="flex items-center justify-between w-full">
                             <h3 className="text-lg font-semibold text-gray-200">
                               {card.event_name}
                             </h3>
-                            <p className="text-sm text-gray-400 mt-1">
-                              Price: {card.ticket_start_price}
-                            </p>
-                            <div className="text-sm text-gray-400 mt-2">
-                              <p>{formatDate(card.start_date)}</p>
-                            </div>
+                            <Dropdown
+                              className="text-gray-400 cursor-pointe"
+                              menu={{
+                                items,
+                              }}
+                            >
+                              <a onClick={(e) => e.preventDefault()}>
+                                <Space>
+                                  <BiDotsVerticalRounded size={20} />
+                                </Space>
+                              </a>
+                            </Dropdown>
+                          </div>
+                          <p className="text-sm text-gray-400">Price: {card.ticket_start_price}</p>
+                          <div className="text-sm text-gray-400">
+                            <p>{formatDate(card.start_date)}</p>
                           </div>
                           <div className="flex-shrink-0">
                             <button className="text-gray-500 hover:text-white">
-                              {card.explore === 'NO' ? "Draft" : "Live"}
+                              {card.explore === "NO" ? "Draft" : "Live"}
                             </button>
                           </div>
                         </a>
@@ -234,13 +260,127 @@ const OrgEvent = () => {
               </>
             )}
             {activeTab === "Live" && (
-              <p className="text-white">Live events will be listed here.</p>
+              <>
+                <div className="-mx-8 flex justify-start items-start my-4">
+                  <div className="relative w-full max-w-md">
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2 pl-10 bg-black border border-[#191919] text-gray-200 rounded-md outline-none"
+                      placeholder="Search live events..."
+                    />
+                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                      <FaSearch className="w-4 h-4 text-gray-500" />
+                    </div>
+                  </div>
+                </div>
+                <div className="-mx-8">
+                  {events.length === 0 ? (
+                    <div className="text-center text-gray-400 py-10">
+                      <p className="text-lg">No events are available</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                      {events
+                        .filter(event => event.explore === "YES")
+                        .map((card) => (
+                          <a
+                            href={`/event-info/${card._id}`}
+                            key={card._id}
+                            className="p-4 bg-[#0a0a0a] shadow-md rounded-lg hover:border mb-5 cursor-pointer hover:border-gray-800 flex flex-col space-y-2"
+                          >
+                            <div className="w-full h-48 bg-gray-200 rounded-md overflow-hidden">
+                              <img
+                                src={card.flyer}
+                                alt={card.event_name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between w-full">
+                              <h3 className="text-lg font-semibold text-gray-200">
+                                {card.event_name}
+                              </h3>
+                              <div className="text-gray-400 cursor-pointer">
+                                <BiDotsVerticalRounded size={24} />
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-400">Price: {card.ticket_start_price}</p>
+                            <div className="text-sm text-gray-400">
+                              <p>{formatDate(card.start_date)}</p>
+                            </div>
+                            <div className="flex-shrink-0">
+                              <button className="text-gray-500 hover:text-white">
+                                {card.explore === "NO" ? "Draft" : "Live"}
+                              </button>
+                            </div>
+                          </a>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
             {activeTab === "Past" && (
               <p className="text-white">Past events will be listed here.</p>
             )}
             {activeTab === "Draft" && (
-              <p className="text-white">Draft events will be listed here.</p>
+              <>
+                <div className="-mx-8 flex justify-start items-start my-4">
+                  <div className="relative w-full max-w-md">
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2 pl-10 bg-black border border-[#191919] text-gray-200 rounded-md outline-none"
+                      placeholder="Search draft events..."
+                    />
+                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                      <FaSearch className="w-4 h-4 text-gray-500" />
+                    </div>
+                  </div>
+                </div>
+                <div className="-mx-8">
+                  {events.filter(event => event.explore === "NO").length === 0 ? (
+                    <div className="text-center text-gray-400 py-10">
+                      <p className="text-lg">No draft events are available</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                      {events
+                        .filter(event => event.explore === "NO")
+                        .map((card) => (
+                          <a
+                            href={`/event-info/${card._id}`}
+                            key={card._id}
+                            className="p-4 bg-[#0a0a0a] shadow-md rounded-lg hover:border mb-5 cursor-pointer hover:border-gray-800 flex flex-col space-y-2"
+                          >
+                            <div className="w-full h-48 bg-gray-200 rounded-md overflow-hidden">
+                              <img
+                                src={card.flyer}
+                                alt={card.event_name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between w-full">
+                              <h3 className="text-lg font-semibold text-gray-200">
+                                {card.event_name}
+                              </h3>
+                              <div className="text-gray-400 cursor-pointer">
+                                <BiDotsVerticalRounded size={24} />
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-400">Price: {card.ticket_start_price}</p>
+                            <div className="text-sm text-gray-400">
+                              <p>{formatDate(card.start_date)}</p>
+                            </div>
+                            <div className="flex-shrink-0">
+                              <button className="text-gray-500 hover:text-white">
+                                {card.explore === "NO" ? "Draft" : "Live"}
+                              </button>
+                            </div>
+                          </a>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
             {activeTab === "Cancelled" && (
               <p className="text-white">Canceled events will be listed here.</p>

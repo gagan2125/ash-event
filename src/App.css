@@ -1,8 +1,17 @@
 .no-scrollbar {
-  overflow-y: scroll; /* Enable scrolling */
-  scrollbar-width: none; /* Firefox */
+  overflow-y: scroll;
+  scrollbar-width: none;
 }
 
 .no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none;
 }
+
+.custom-tabs .ant-tabs-tab {
+  color: gray;
+}
+
+.custom-tabs .ant-tabs-tab-active {
+  color: white;
+}
+

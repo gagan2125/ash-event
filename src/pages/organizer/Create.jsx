@@ -4,6 +4,8 @@ import { FaEdit, FaTimes, FaTrash } from "react-icons/fa";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import url from "../../constants/url"
+import { DownOutlined } from '@ant-design/icons';
+import { Dropdown, Space } from 'antd';
 
 const Create = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -43,6 +45,40 @@ const Create = () => {
   const [ticketDescription, setTicketDescription] = useState("");
   const [isExplore, setIsExplore] = useState(true);
   const [file, setFile] = useState(null);
+  const [accountId, setAccountId] = useState("");
+
+  const items = [
+    ...(accountId
+      ? [
+        {
+          label: 'Live Event',
+          key: 'live',
+        },
+      ]
+      : []),
+    {
+      label: 'Save as Draft',
+      key: 'draft',
+    },
+  ];
+
+
+  useEffect(() => {
+    const loadFromLocalStorage = () => {
+      const storedAccountID = localStorage.getItem("accountId");
+      setAccountId(storedAccountID || "");
+    };
+    loadFromLocalStorage();
+
+    const handleStorageChange = () => {
+      loadFromLocalStorage();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const getPlainText = (html) => {
     const parser = new DOMParser();
@@ -153,8 +189,8 @@ const Create = () => {
     };
   }, []);
 
-  const handleAddEvent = async (e) => {
-    e.preventDefault();
+  const handleAddEvent = async (isExplore) => {
+    //e.preventDefault();
 
     const formData = new FormData();
     formData.append('organizer_id', oragnizerId);
@@ -196,11 +232,17 @@ const Create = () => {
     }
   };
 
-
-
   const handleDeleteClick = (indexToDelete) => {
     setTickets((prevTickets) => prevTickets.filter((_, index) => index !== indexToDelete));
   }
+
+  const handleMenuClick = ({ key }) => {
+    if (key === 'live') {
+      handleAddEvent(true);
+    } else if (key === 'draft') {
+      handleAddEvent(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -210,12 +252,26 @@ const Create = () => {
             Cancel
           </a>
 
-          <button
+          {/* <button
             onClick={handleAddEvent}
             className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
           >
             Create Event
-          </button>
+          </button> */}
+          <Dropdown
+            className="bg-gray-300 text-black text-sm font-md py-1 px-2 rounded-md hover:bg-gray-400 transition-colors"
+            menu={{
+              items,
+              onClick: handleMenuClick,
+            }}
+          >
+            <button>
+              <Space>
+                Create Event
+                <DownOutlined />
+              </Space>
+            </button>
+          </Dropdown>
         </div>
 
         <div className="flex justify-center">
@@ -302,7 +358,7 @@ const Create = () => {
                   onChange={(e) => setAddress(e.target.value)}
                 />
               </div>
-              <div className="flex items-center space-x-4 mt-10">
+              {/* <div className="flex items-center space-x-4 mt-10">
                 <h1 className="text-white">Show Event on Explore</h1>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -314,7 +370,7 @@ const Create = () => {
                   <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 peer-focus:ring-2 peer-focus:ring-green-300"></div>
                   <div className="absolute inset-y-0 left-1 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
                 </label>
-              </div>
+              </div> */}
               <div>
                 <input
                   type="text"
@@ -507,43 +563,6 @@ const Create = () => {
                         type="checkbox"
                         id="showValidDates"
                         className="w-5 h-5"
-                        onChange={handleCheckboxValidChange}
-                      />
-                      <label htmlFor="showValidDates" className="text-gray-400">
-                        Validity Period
-                      </label>
-                    </div>
-                    {showValidDates && (
-                      <div className="flex space-x-4">
-                        <div>
-                          <label className="text-gray-400">Start Date</label>
-                          <input
-                            type="date"
-                            className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
-                            value={startValid}
-                            onChange={(e) => setStartValid(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-gray-400">End Date</label>
-                          <input
-                            type="date"
-                            className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
-                            value={endValid}
-                            onChange={(e) => setEndValid(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="mb-4 mt-10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <input
-                        type="checkbox"
-                        id="showValidDates"
-                        className="w-5 h-5"
                         onChange={handleLimitChange}
                       />
                       <label htmlFor="showValidDates" className="text-gray-400">
@@ -690,49 +709,6 @@ const Create = () => {
                         onChange={() =>
                           setSelectedTicket((prev) => ({
                             ...prev,
-                            showValidDates: !prev.showValidDates,
-                          }))
-                        }
-                        checked={selectedTicket?.showValidDates || false}
-                      />
-                      <label htmlFor="showValidDates" className="text-gray-400">
-                        Validity Period
-                      </label>
-                    </div>
-                    {selectedTicket.showValidDates && (
-                      <div className="flex space-x-4">
-                        <div>
-                          <label className="text-gray-400">Start Date</label>
-                          <input
-                            type="date"
-                            className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
-                            value={selectedTicket.startValid || ""}
-                            onChange={(e) => setSelectedTicket((prev) => ({ ...prev, startValid: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-gray-400">End Date</label>
-                          <input
-                            type="date"
-                            className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
-                            value={selectedTicket.endValid || ""}
-                            onChange={(e) => setSelectedTicket((prev) => ({ ...prev, endValid: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="mb-4 mt-10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <input
-                        type="checkbox"
-                        id="showValidDates"
-                        className="w-5 h-5"
-                        onChange={() =>
-                          setSelectedTicket((prev) => ({
-                            ...prev,
                             limit: !prev.limit,
                           }))
                         }
@@ -785,7 +761,7 @@ const Create = () => {
             </div>
           )}
         </div>
-        <div className="flex justify-center items-center bg-black text-white p-4">
+        {/* <div className="flex justify-center items-center bg-black text-white p-4">
           <div className="w-full max-w-3xl bg-black rounded-lg shadow-md p-6">
             <div
               className="flex justify-between items-center cursor-pointer mb-4 border-b border-gray-600 pb-2"
@@ -848,7 +824,7 @@ const Create = () => {
               </>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

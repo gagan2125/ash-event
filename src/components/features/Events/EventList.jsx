@@ -2,8 +2,12 @@ import { MdLocationOn, MdDateRange, MdAttachMoney } from "react-icons/md";
 import url from "../../../constants/url";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+
 const EventList = () => {
   const [events, setEvents] = useState([]);
+  const navigate = useNavigate();
 
   const fetchEvents = async () => {
     try {
@@ -25,6 +29,12 @@ const EventList = () => {
     const year = date.getFullYear().toString().slice(-2);
     const time = date.toTimeString().slice(0, 5); // Extract HH:mm
     return `${day} ${month} ${year} ${time}`;
+  };
+
+  const handleDetail = (id, name) => {
+    navigate(`/event/${name}`, {
+      state: { id: id },
+    });
   };
 
   // const events = [
@@ -120,29 +130,32 @@ const EventList = () => {
         <div className="flex justify-center">
           {events.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {events.map((event, index) => (
-                <a
-                  href={`/single-event/${event._id}/${event.event_name.replace(/\s+/g, '-')}`}
-                  key={index}
-                  className="rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:-translate-y-2 hover:scale-105"
-                >
-                  <div className="w-[300px] h-[300px] relative">
-                    <img
-                      src={event.flyer}
-                      alt={event.event_name}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="py-4">
-                    <h3 className="text-lg text-white font-semibold">
-                      {event.event_name}
-                    </h3>
-                    <p className="text-yellow-300">{formatDate(event.start_date)}</p>
-                    <p className="text-gray-300">{event.venue_name}</p>
-                    <p className="text-gray-200 font-bold">Starting: ${event.ticket_start_price}</p>
-                  </div>
-                </a>
-              ))}
+              {events
+                .filter(event => event.explore === "YES")
+                .map((event, index) => (
+                  <button
+                    onClick={() => handleDetail(event._id, event.event_name.replace(/\s+/g, '-'))}
+                    key={index}
+                    className="rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:-translate-y-2 hover:scale-105"
+                  >
+                    <div className="w-[300px] h-[300px] relative">
+                      <img
+                        src={event.flyer}
+                        alt={event.event_name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="py-4">
+                      <h3 className="text-lg text-white font-semibold">
+                        {event.event_name}
+                      </h3>
+                      <p className="text-yellow-300">{formatDate(event.start_date)}</p>
+                      <p className="text-gray-300">{event.venue_name}</p>
+                      <p className="text-gray-200 font-bold">Starting: ${event.ticket_start_price}</p>
+                    </div>
+                  </button>
+                ))}
+
             </div>
           ) : (
             <div className="text-center text-white mt-8 mb-20">

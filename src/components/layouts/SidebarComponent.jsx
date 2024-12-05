@@ -5,10 +5,12 @@ import {
   ChartPie,
   BookCheck,
   BadgeDollarSign,
+  Group,
 } from "lucide-react";
 import Sidebar, { SidebarItem } from "../layouts/Sidebar";
 import { useLocation } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
+import { FaPeopleGroup } from "react-icons/fa6";
 const SidebarComponent = () => {
   const location = useLocation();
   return (
@@ -32,7 +34,7 @@ const SidebarComponent = () => {
           icon={<CalendarCheck size={20} />}
           text="Events"
           link="/org-event"
-          active={location.pathname === "/org-event"}
+          active={location.pathname === "/org-event" || location.pathname === "/event-info"}
         />
         <SidebarItem
           icon={<BookCheck size={20} />}
@@ -41,10 +43,16 @@ const SidebarComponent = () => {
           active={location.pathname === "/market"}
         />
         <SidebarItem
+          icon={<FaPeopleGroup size={20} />}
+          text="Members"
+          link="/members"
+          active={location.pathname === "/members"}
+        />
+        <SidebarItem
           icon={<BadgeDollarSign size={20} />}
           text="Finance"
           link="/finance"
-          active={location.pathname === "/finance" || location.pathname === "/event-info"}
+          active={location.pathname === "/finance"}
         />
         <div className="my-8"></div>
         <SidebarItem

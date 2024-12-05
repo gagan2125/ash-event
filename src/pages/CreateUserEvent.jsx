@@ -4,6 +4,8 @@ import { FaEdit, FaTimes } from "react-icons/fa";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import url from "../constants/url"
+import { AndroidOutlined, AppleOutlined, BankOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Tabs } from 'antd';
 
 const CreateUserEvent = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -47,6 +49,7 @@ const CreateUserEvent = () => {
   const [userOragnizerId, setUserOragnizerId] = useState("")
   const [userId, setUserId] = useState(null);
   const [oragnizerId, setOragnizerId] = useState(null);
+  const [accountLink, setAccountLink] = useState(null);
   const [file, setFile] = useState(null);
 
   const [step, setStep] = useState(0);
@@ -60,6 +63,10 @@ const CreateUserEvent = () => {
     email: '',
     businessName: '',
   });
+
+  const [tabPosition, setTabPosition] = useState('left');
+  const [activeKey, setActiveKey] = useState("1");
+  const [disableTabs, setDisableTabs] = useState(true);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -126,8 +133,6 @@ const CreateUserEvent = () => {
           setUserOragnizerId(organizerId);
           localStorage.setItem('organizerId', organizerId);
           localStorage.setItem('accountLink', accountLink);
-
-          alert("Success", "Profile Created Successfully!");
           setTimeout(() => {
             handleAddEvent();
           }, 500);
@@ -159,20 +164,23 @@ const CreateUserEvent = () => {
       if (response.data.success) {
         const { accountLink, organizerId } = response.data;
         setUserOragnizerId(organizerId);
+        setAccountLink(accountLink);
         localStorage.setItem('organizerId', organizerId);
         localStorage.setItem('accountLink', accountLink);
+        localStorage.setItem('userName', formData.firstName);
 
         alert("Profile Created Successfully!");
-        setOrgModal(false)
-        setOragnizerId(organizerId)
+        setOragnizerId(organizerId);
+        setActiveKey("2");
+        setDisableTabs(false);
       } else {
         alert("Error", response.data.message || "Failed to create connected account!");
-        console.log("error of connect")
       }
     } catch (error) {
       console.error('Adding Organizer:', error);
     }
-  }
+  };
+
 
 
   useEffect(() => {
@@ -321,11 +329,24 @@ const CreateUserEvent = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      alert('Event added successfully!');
       window.location.href = "/org-event";
     } catch (error) {
       console.error('Error:', error);
       alert('Failed to add event. Please try again.');
+    }
+  };
+
+  const changeTabPosition = (e) => {
+    setTabPosition(e.target.value);
+  };
+
+  const handleStripeURL = async (e) => {
+    try {
+      await handleAddEvent(e);
+      window.location.href = accountLink;
+    } catch (error) {
+      console.error("Error during Stripe setup:", error);
+      alert("Failed to complete Stripe setup. Please try again.");
     }
   };
 
@@ -453,7 +474,7 @@ const CreateUserEvent = () => {
                   onChange={(e) => setAddress(e.target.value)}
                 />
               </div>
-              <div className="flex items-center space-x-4 mt-10 hidden">
+              <div className="items-center space-x-4 mt-10 hidden">
                 <h1 className="text-white">Show Event on Explore</h1>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -1108,8 +1129,8 @@ const CreateUserEvent = () => {
           {orgModal && (
             <>
               <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-                <div className="bg-black w-full max-w-lg p-6 rounded-lg shadow-lg relative border border-gray-600">
-                  <div>
+                <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-lg relative border border-gray-600">
+                  {/* <div>
                     <h2 className="text-xl font-bold mb-4">Business Details</h2>
                     <input
                       type="text"
@@ -1127,7 +1148,72 @@ const CreateUserEvent = () => {
                         Finish & Create Event
                       </button>
                     </div>
-                  </div>
+                  </div> */}
+                  <Tabs
+                    activeKey={activeKey}
+                    onChange={(key) => {
+                      if (disableTabs || (activeKey === "2" && key === "1")) {
+                        return;
+                      }
+                      setActiveKey(key);
+                    }}
+                    className="custom-tabs"
+                    tabBarStyle={{
+                      borderBottom: "none",
+                    }}
+                    items={[
+                      {
+                        key: "1",
+                        label: "Info",
+                        icon: <InfoCircleOutlined />,
+                        children: (
+                          <div className="mt-5">
+                            <input
+                              type="text"
+                              name="businessName"
+                              value={formData.businessName}
+                              onChange={handleChange}
+                              placeholder="Enter Business Name"
+                              className="border-b p-2 outline-none border-gray-200 bg-white w-full mb-4"
+                            />
+                            <div className="flex justify-end">
+                              <button
+                                onClick={handleOrgFinish}
+                                className="bg-green-500 text-black font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
+                              >
+                                Next
+                              </button>
+                            </div>
+                          </div>
+                        ),
+                      },
+                      {
+                        key: "2",
+                        label: "Stripe",
+                        icon: <BankOutlined />,
+                        children: (
+                          <div className="mt-5">
+                            <div className="text-center">
+                              <button
+                                className="text-black font-semibold py-2 px-4 rounded-md transition-colors mb-4 hover:underline"
+                                onClick={handleStripeURL}
+                              >
+                                Click here to complete Stripe setup
+                              </button>
+                            </div>
+                            <div className="flex justify-end mt-4">
+                              <button
+                                onClick={handleAddEvent}
+                                className="bg-green-500 text-black font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
+                              >
+                                Skip and create event
+                              </button>
+                            </div>
+                          </div>
+                        ),
+                      },
+                    ]}
+                  />
                   <button
                     onClick={() => setOrgModal(false)}
                     className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -1139,7 +1225,6 @@ const CreateUserEvent = () => {
             </>
           )}
         </div>
-
       </div>
     </div>
   );

@@ -19,6 +19,8 @@ import { FaSearch } from "react-icons/fa";
 import axios from "axios";
 import url from "../../constants/url";
 import { useParams } from "react-router-dom";
+import { PiDotsThreeVertical } from "react-icons/pi";
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -217,40 +219,93 @@ const Eventinfo = () => {
                         <>
                             <div className="flex-1 flex flex-col p-10 overflow-y-auto no-scrollbar">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h1 className="text-3xl font-semibold text-white">Finance {"-"} {event.event_name}</h1>
+                                    <h1 className="text-3xl font-semibold text-white">{event.event_name}</h1>
+                                    <a
+                                        className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                                        href={`/edit-event/${id}`}
+                                    >
+                                        Manage Event
+                                    </a>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-32">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+                                    <div
+                                        className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <div className="text-2xl font-bold text-gray-200">
+                                                ${(totalAmount / 100).toFixed(2) || 0}
+                                            </div>
 
-                                    <div className="bg-black text-white p-6 rounded-lg shadow-md flex flex-col items-start mt-10">
-                                        <CiBag1 className="text-2xl mb-1" />
-                                        <p className="text-3xl font-medium mb-1">
-                                            ${(totalAmount / 100).toFixed(2) || 0}
-                                        </p>
-                                        <p className="text-lg font-normal text-gray-400">Revenue</p>
+                                            <div className="flex space-x-2">
+                                                <PiDotsThreeVertical
+                                                    size={24}
+                                                    className="text-white cursor-pointer hover:text-gray-200"
+                                                />
+                                            </div>
+                                        </div>
+                                        <h3 className="mt-1 text-lg font-semibold text-gray-500">
+                                            Revenue
+                                        </h3>
                                     </div>
 
-                                    <div className="bg-black text-white p-6 rounded-lg shadow-md flex flex-col items-start mt-10">
-                                        <CiBag1 className="text-2xl mb-1" />
-                                        <p className="text-3xl font-medium mb-1">
-                                            {book.length || 0}
-                                        </p>
-                                        <p className="text-lg font-normal text-gray-400">Members</p>
+                                    <div
+                                        className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <div className="text-2xl font-bold text-gray-200">
+                                                {book.length || 0}
+                                            </div>
+
+                                            <div className="flex space-x-2">
+                                                <PiDotsThreeVertical
+                                                    size={24}
+                                                    className="text-white cursor-pointer hover:text-gray-200"
+                                                />
+                                            </div>
+                                        </div>
+                                        <h3 className="mt-1 text-lg font-semibold text-gray-500">
+                                            Attendes
+                                        </h3>
                                     </div>
 
-                                    <div className="bg-black text-white p-6 rounded-lg shadow-md flex flex-col items-start mt-10">
-                                        <CiBag1 className="text-2xl mb-1" />
-                                        <p className="text-3xl font-medium mb-1">
-                                            {soldTickets || 0}
-                                        </p>
-                                        <p className="text-lg font-normal text-gray-400">Sold Out</p>
+                                    <div
+                                        className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <div className="text-2xl font-bold text-gray-200">
+                                                {soldTickets || 0}
+                                            </div>
+
+                                            <div className="flex space-x-2">
+                                                <PiDotsThreeVertical
+                                                    size={24}
+                                                    className="text-white cursor-pointer hover:text-gray-200"
+                                                />
+                                            </div>
+                                        </div>
+                                        <h3 className="mt-1 text-lg font-semibold text-gray-500">
+                                            Sold Out
+                                        </h3>
                                     </div>
 
-                                    <div className="bg-black text-white p-6 rounded-lg shadow-md flex flex-col items-start mt-10">
-                                        <CiBag1 className="text-2xl mb-1" />
-                                        <p className="text-3xl font-medium mb-1">
-                                            {totalQuantity - soldTickets || 0}
-                                        </p>
-                                        <p className="text-lg font-normal text-gray-400">Remaining</p>
+                                    <div
+                                        className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <div className="text-2xl font-bold text-gray-200">
+                                                {totalQuantity - soldTickets || 0}
+                                            </div>
+
+                                            <div className="flex space-x-2">
+                                                <PiDotsThreeVertical
+                                                    size={24}
+                                                    className="text-white cursor-pointer hover:text-gray-200"
+                                                />
+                                            </div>
+                                        </div>
+                                        <h3 className="mt-1 text-lg font-semibold text-gray-500">
+                                            Remaining
+                                        </h3>
                                     </div>
                                 </div>
                                 <h2 className="text-xl text-white font-semibold mb-4 mt-10 flex items-center justify-between">

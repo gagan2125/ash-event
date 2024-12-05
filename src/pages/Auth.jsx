@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import url from "../constants/url";
 import axios from "axios";
+import { Button, Modal, Space } from 'antd';
 
 const Auth = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -10,6 +11,12 @@ const Auth = ({ navigation }) => {
   const [selectedCountryCode, setSelectedCountryCode] = useState('+1');
 
   const numberWithCode = selectedCountryCode + phoneNumber;
+
+  const success = () => {
+    Modal.success({
+      content: 'some messages...some messages...',
+    });
+  };
 
   const handleSendOtp = async () => {
     try {
@@ -35,7 +42,23 @@ const Auth = ({ navigation }) => {
         if (userID && authToken) {
           localStorage.setItem('userID', userID);
           localStorage.setItem('authToken', authToken);
-          window.location.href = "/basic-info"
+
+          Modal.success({
+            title: 'Successfully Logged in',
+            content: 'continue your browsing events',
+            onOk: () => {
+              window.history.back();
+            },
+            okButtonProps: {
+              style: { backgroundColor: 'black', borderColor: 'black', color: 'white' },
+            },
+            cancelButtonProps: {
+              style: { display: 'none' },
+            },
+            maskStyle: { backgroundColor: 'rgba(0, 0, 0, 0.8)' },
+            style: { color: 'white', backgroundColor: '#000', borderRadius: '8px', borderColor: '#ccc' },
+          });
+
         } else {
           alert('Error', 'Invalid response data from server.');
         }
@@ -47,6 +70,8 @@ const Auth = ({ navigation }) => {
       alert('Failed to login');
     }
   };
+
+
 
   return (
     <div className="h-screen flex justify-center p-4 py-20">

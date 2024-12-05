@@ -9,12 +9,12 @@ import {
 } from "react-icons/io";
 import { TfiAnnouncement } from "react-icons/tfi";
 import { LuDoorOpen } from "react-icons/lu";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import url from "../../../constants/url";
 
 const SingleInfo = () => {
-  const { id, name } = useParams()
+  const { name } = useParams()
   const [showPopup, setShowPopup] = useState(false);
   const [count, setCount] = useState(1);
   const [activeTab, setActiveTab] = useState("Tickets");
@@ -23,6 +23,12 @@ const SingleInfo = () => {
   const [selectedTicketId, setSelectedTicketId] = useState("");
   const [selectedTicketName, setSelectedTicketName] = useState("");
   const navigate = useNavigate();
+  const [userId, setUserId] = useState(null);
+  const location = useLocation();
+
+  const { id } = location.state || {};
+
+  console.log("id:", id)
 
   const handleCheckout = () => {
     navigate("/checkout", {
@@ -98,6 +104,15 @@ const SingleInfo = () => {
     const time = date.toTimeString().slice(0, 5); // Extract HH:mm
     return `${day} ${month} ${year} ${time}`;
   };
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userID');
+    setUserId(storedUserId);
+  }, []);
+
+  const loginDirect = () => {
+    navigate('/auth');
+  }
 
   return (
     <div className="flex justify-start sm:px-72 items-start min-h-screen bg-black -mt-20">
@@ -256,15 +271,33 @@ const SingleInfo = () => {
               </div>
               <div className="bg-[#2c2c2c] p-3 rounded-lg shadow-md flex justify-between items-center w-full sm:w-full">
                 <span className="text-md font-bold text-gray-200">Starting at: ${event.ticket_start_price}</span>
-                <h3
-                  onClick={togglePopup}
-                  className="text-black bg-gray-200 flex gap-2 p-2 px-7 rounded-full font-bold text-md cursor-pointer hover:bg-gray-300"
-                >
-                  <span>
-                    <BiPurchaseTagAlt className="mt-1" size={20} />
-                  </span>
-                  Book Now
-                </h3>
+                {
+                  userId ? (
+                    <>
+                      <h3
+                        onClick={togglePopup}
+                        className="text-black bg-gray-200 flex gap-2 p-2 px-7 rounded-full font-bold text-md cursor-pointer hover:bg-gray-300"
+                      >
+                        <span>
+                          <BiPurchaseTagAlt className="mt-1" size={20} />
+                        </span>
+                        Book Now
+                      </h3>
+                    </>
+                  ) : (
+                    <>
+                      <h3
+                        onClick={loginDirect}
+                        className="text-black bg-gray-200 flex gap-2 p-2 px-7 rounded-full font-bold text-md cursor-pointer hover:bg-gray-300"
+                      >
+                        <span>
+                          <BiPurchaseTagAlt className="mt-1" size={20} />
+                        </span>
+                        Login & Book
+                      </h3>
+                    </>
+                  )
+                }
               </div>
             </div>
 

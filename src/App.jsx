@@ -31,6 +31,9 @@ import { Elements } from "@stripe/react-stripe-js";
 import QrTicket from "./pages/QrTicket";
 import Eventinfo from "./pages/organizer/Eventinfo";
 import MyProfile from "./pages/MyProfile";
+import Success from "./pages/Success";
+import ProfileUrl from './pages/organizer/ProfileUrl'
+import Members from "./pages/organizer/Members"
 
 function App() {
   const location = useLocation();
@@ -52,6 +55,9 @@ function App() {
     '/onboarding-success',
     '/qr-ticket',
     '/event-info',
+    '/success',
+    '/profile-url',
+    '/members'
   ];
 
   const shouldHideNavbarAndFooter = hideNavbarAndFooterPaths.some((path) =>
@@ -66,7 +72,7 @@ function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<Events />} />
-        <Route path="/single-event/:id/:name" element={<SingleEvent />} />
+        <Route path="/event/:name" element={<SingleEvent />} />
         <Route path="/my-tickets" element={<MyTickets />} />
         <Route path="/payment" element={<PaymentStripe />} />
         <Route path="/launch-event" element={<LaunchEvent />} />
@@ -94,8 +100,11 @@ function App() {
         <Route path="/edit-event/:id" element={<Edit />} />
         <Route path="/qr-ticket/:id" element={<QrTicket />} />
         <Route path="/onboarding-success/:accountId" element={<OnboardingSuccess />} />
+        <Route path="/success/:accountId" element={<Success />} />
         <Route path="/event-info/:id" element={<Eventinfo />} />
         <Route path="/my-profile" element={<MyProfile />} />
+        <Route path="/profile-url/:id/:name" element={<ProfileUrl />} />
+        <Route path="/members" element={<Members/>} />
       </Routes>
       {!shouldHideNavbarAndFooter && <Footer />}
     </div>

@@ -1,17 +1,82 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SidebarComponent from "../../components/layouts/SidebarComponent";
+import axios from "axios";
+import url from "../../constants/url";
+import { FaCopy } from "react-icons/fa";
 
 const Profile = () => {
   const [copied, setCopied] = useState(false);
+  const [oragnizerId, setOragnizerId] = useState(null);
+  const [organizer, setOrganizer] = useState({
+    bio: "",
+    name: "",
+  });
+
 
   const handleCopy = (e) => {
-    e.preventDefault()
-    navigator.clipboard.writeText(`http://localhost:5173/`);
+    e.preventDefault();
+    const formattedName = organizer.name.replace(/\s+/g, '-');
+    navigator.clipboard.writeText(`http://localhost:5173/profile-url/${organizer._id}/${formattedName}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+
+  useEffect(() => {
+    const loadFromLocalStorage = () => {
+      const storedUserOrganizerId = localStorage.getItem('organizerId');
+      if (storedUserOrganizerId) {
+        setOragnizerId(storedUserOrganizerId);
+      } else {
+        console.warn("No organizerId found in localStorage");
+      }
+    };
+
+    loadFromLocalStorage();
+    const handleStorageChange = () => {
+      loadFromLocalStorage();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  const fetchOrganizer = async () => {
+    if (oragnizerId) {
+      try {
+        const response = await axios.get(`${url}/get-organizer/${oragnizerId}`);
+        setOrganizer(response.data);
+      } catch (error) {
+        console.error("Error fetching organizer:", error);
+      }
+    } else {
+      console.log("not found")
+    }
+  };
+
+  useEffect(() => {
+    if (oragnizerId) {
+      fetchOrganizer();
+    }
+  }, [oragnizerId]);
+
+  const handleUpdate = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await axios.put(`${url}/update-organizer/${oragnizerId}`, {
+        bio: organizer.bio,
+        name: organizer.name,
+      });
+      alert("Organizer updated successfully!");
+      window.location.reload()
+    } catch (error) {
+      console.error("Error updating organizer:", error);
+      alert("Failed to update organizer. Please try again.");
+    }
+  };
 
   return (
     <>
@@ -32,8 +97,8 @@ const Profile = () => {
             <form>
               <div className="space-y-12">
                 <div className="border-b border-gray-900/10 pb-5">
-                  <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                    <div className="col-span-full">
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                    {/* <div className="col-span-full">
                       <label
                         htmlFor="cover-photo"
                         className="block text-sm/6 font-medium text-gray-200"
@@ -75,9 +140,9 @@ const Profile = () => {
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                     <div className="col-span-full">
-                      <div className="mt-2 flex items-center gap-x-3">
+                      <div className="flex items-center gap-x-3">
                         <svg
                           className="size-40 text-gray-300"
                           viewBox="0 0 24 24"
@@ -92,26 +157,13 @@ const Profile = () => {
                           />
                         </svg>
                         <h3 className="text-white text-3xl flex items-center gap-x-2">
-                          Bobs Bar Party
+                          {organizer.name || ""}
                           <button
                             onClick={handleCopy}
                             className="p-1 rounded hover:bg-gray-700 focus:outline-none"
                             aria-label="Copy text"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth="2"
-                              stroke="currentColor"
-                              className="w-6 h-6 text-gray-300 hover:text-white"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M8 16h8m-4-8h4m-2-4h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2Zm0 8h4m-4-4h2"
-                              />
-                            </svg>
+                            <FaCopy size={16} />
                           </button>
                         </h3>
                       </div>
@@ -128,7 +180,11 @@ const Profile = () => {
                           id="about"
                           name="about"
                           rows="3"
-                          className="block w-full rounded-md border-0 py-1.5 bg-black text-gray-200 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                          value={organizer.bio || ""}
+                          onChange={(e) =>
+                            setOrganizer((prev) => ({ ...prev, bio: e.target.value }))
+                          }
+                          className="block w-full rounded-md border-0 px-3 py-1.5 bg-black text-gray-200 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
                         ></textarea>
                       </div>
                       <p className="mt-3 text-sm/6 text-gray-400">
@@ -142,25 +198,25 @@ const Profile = () => {
                   <h2 className="text-base/7 font-semibold text-gray-200">
                     Personal Information
                   </h2>
-                  <p className="mt-1 text-sm/6 text-gray-500">
-                    Please fill correct details below
-                  </p>
-
-                  <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                  <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                     <div className="sm:col-span-3">
                       <label
                         htmlFor="first-name"
                         className="block text-sm/6 font-medium text-gray-200"
                       >
-                        First name *
+                        Business Name
                       </label>
                       <div className="mt-2">
                         <input
                           type="text"
                           name="first-name"
                           id="first-name"
+                          value={organizer.name || ""}
+                          onChange={(e) =>
+                            setOrganizer((prev) => ({ ...prev, name: e.target.value }))
+                          }
                           autoComplete="given-name"
-                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-200 px-3 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
                         />
                       </div>
                     </div>
@@ -170,54 +226,21 @@ const Profile = () => {
                         htmlFor="last-name"
                         className="block text-sm/6 font-medium text-gray-200"
                       >
-                        Last name *
+                        Stripe Account ID
                       </label>
                       <div className="mt-2">
                         <input
                           type="text"
                           name="last-name"
                           id="last-name"
+                          value={organizer.stripeAccountId || ""}
                           autoComplete="family-name"
-                          className="block w-full rounded-md border-0 py-1.5 bg-black text-gray-900 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                          readOnly
+                          className="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-500 text-gray-900 focus:outline-none shadow-sm placeholder:text-gray-400 sm:text-sm/6"
                         />
                       </div>
                     </div>
 
-                    <div className="sm:col-span-3">
-                      <label
-                        htmlFor="first-name"
-                        className="block text-sm/6 font-medium text-gray-200"
-                      >
-                        Phone Number *
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="text"
-                          name="first-name"
-                          id="first-name"
-                          autoComplete="given-name"
-                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                      <label
-                        htmlFor="first-name"
-                        className="block text-sm/6 font-medium text-gray-200"
-                      >
-                        Email ID
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          type="text"
-                          name="first-name"
-                          id="first-name"
-                          autoComplete="given-name"
-                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
-                        />
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -230,7 +253,7 @@ const Profile = () => {
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  onClick={handleUpdate}
                   className="rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                   Update
