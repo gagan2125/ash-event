@@ -1,11 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FaEdit, FaTimes } from "react-icons/fa";
+import { FaEdit, FaTimes, FaTrash } from "react-icons/fa";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import url from "../constants/url"
 import { AndroidOutlined, AppleOutlined, BankOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
+import { Loader } from 'rsuite';
 
 const CreateUserEvent = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -67,6 +68,8 @@ const CreateUserEvent = () => {
   const [tabPosition, setTabPosition] = useState('left');
   const [activeKey, setActiveKey] = useState("1");
   const [disableTabs, setDisableTabs] = useState(true);
+
+  const [isNextLoading, setIsNextLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -156,6 +159,7 @@ const CreateUserEvent = () => {
   }
 
   const handleOrgFinish = async () => {
+    setIsNextLoading(true)
     try {
       const response = await axios.post(`${url}/create-connected-account`, {
         name: formData.businessName,
@@ -178,6 +182,8 @@ const CreateUserEvent = () => {
       }
     } catch (error) {
       console.error('Adding Organizer:', error);
+    } finally {
+      setIsNextLoading(false); // Stop the loader
     }
   };
 
@@ -349,6 +355,10 @@ const CreateUserEvent = () => {
       alert("Failed to complete Stripe setup. Please try again.");
     }
   };
+
+  const handleDeleteClick = (indexToDelete) => {
+    setTickets((prevTickets) => prevTickets.filter((_, index) => index !== indexToDelete));
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -563,10 +573,20 @@ const CreateUserEvent = () => {
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold">{ticket.ticketName}</h3>
                       <p className="text-lg mt-3">${ticket.price}</p>
+                      <p className="text-sm mt-1" dangerouslySetInnerHTML={{ __html: ticket.ticketDescription }}></p>
                     </div>
-                    <div className="ml-4">
-                      <button onClick={() => handleEditClick(ticket, index)} className="bg-gray-300 text-black p-2 rounded-full hover:bg-gray-400 transition-colors">
+                    <div className="ml-4 flex space-x-2">
+                      <button
+                        onClick={() => handleEditClick(ticket, index)}
+                        className="bg-gray-300 text-black p-2 rounded-full hover:bg-gray-400 transition-colors"
+                      >
                         <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(index)}
+                        className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                      >
+                        <FaTrash />
                       </button>
                     </div>
                   </div>
@@ -663,7 +683,7 @@ const CreateUserEvent = () => {
                     </div>
                   )}
                 </div>
-                <div className="mb-4 mt-10">
+                {/* <div className="mb-4 mt-10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <input
@@ -699,7 +719,7 @@ const CreateUserEvent = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </div> */}
                 <div className="mb-4 mt-10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -710,7 +730,7 @@ const CreateUserEvent = () => {
                         onChange={handleLimitChange}
                       />
                       <label htmlFor="showValidDates" className="text-gray-400">
-                        limit Purchase only
+                        Ticket Purchase limit
                       </label>
                     </div>
                     {limit && (
@@ -843,7 +863,7 @@ const CreateUserEvent = () => {
                     </div>
                   )}
                 </div>
-                <div className="mb-4 mt-10">
+                {/* <div className="mb-4 mt-10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <input
@@ -885,7 +905,7 @@ const CreateUserEvent = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </div> */}
                 <div className="mb-4 mt-10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -948,7 +968,7 @@ const CreateUserEvent = () => {
             </div>
           )}
         </div>
-        <div className="flex justify-center items-center bg-black text-white p-4">
+        {/* <div className="flex justify-center items-center bg-black text-white p-4">
           <div className="w-full max-w-3xl bg-black rounded-lg shadow-md p-6">
             <div
               className="flex justify-between items-center cursor-pointer mb-4 border-b border-gray-600 pb-2"
@@ -1011,7 +1031,7 @@ const CreateUserEvent = () => {
               </>
             )}
           </div>
-        </div>
+        </div> */}
         <div className={step > 0 ? 'blur-background' : ''}>
           {step > 0 && (
             <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
@@ -1179,11 +1199,18 @@ const CreateUserEvent = () => {
                             <div className="flex justify-end">
                               <button
                                 onClick={handleOrgFinish}
-                                className="bg-green-500 text-black font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
+                                disabled={isNextLoading}
+                                className={`bg-green-500 text-black font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors ${isNextLoading ? "opacity-50 cursor-not-allowed" : ""
+                                  }`}
                               >
-                                Next
+                                {isNextLoading ? (
+                                  <Loader speed="fast" size="sm" content="Loading..." />
+                                ) : (
+                                  "Next"
+                                )}
                               </button>
                             </div>
+
                           </div>
                         ),
                       },
@@ -1206,7 +1233,7 @@ const CreateUserEvent = () => {
                                 onClick={handleAddEvent}
                                 className="bg-green-500 text-black font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
                               >
-                                Skip and create event
+                                Skip and create draft event
                               </button>
                             </div>
                           </div>

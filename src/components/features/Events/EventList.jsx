@@ -128,7 +128,7 @@ const EventList = () => {
           </h2>
         </div>
         <div className="flex justify-center">
-          {events.length > 0 ? (
+          {events.filter(event => event.explore === "YES").length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {events
                 .filter(event => event.explore === "YES")
@@ -146,16 +146,13 @@ const EventList = () => {
                       />
                     </div>
                     <div className="py-4">
-                      <h3 className="text-lg text-white font-semibold">
-                        {event.event_name}
-                      </h3>
+                      <h3 className="text-lg text-white font-semibold">{event.event_name}</h3>
                       <p className="text-yellow-300">{formatDate(event.start_date)}</p>
                       <p className="text-gray-300">{event.venue_name}</p>
                       <p className="text-gray-200 font-bold">Starting: ${event.ticket_start_price}</p>
                     </div>
                   </button>
                 ))}
-
             </div>
           ) : (
             <div className="text-center text-white mt-8 mb-20">

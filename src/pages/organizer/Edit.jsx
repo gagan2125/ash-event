@@ -51,6 +51,8 @@ const Edit = () => {
     const [file, setFile] = useState(null);
     const [accountId, setAccountId] = useState("");
 
+    const [isUpdateLoading, setIsUpdateLoading] = useState(false)
+
     const items = [
         ...(accountId
             ? [
@@ -86,7 +88,7 @@ const Edit = () => {
     const handleDeleteEvent = async () => {
         try {
             const response = await axios.delete(`${url}/event/delete-event/${id}`)
-            alert('Event deleted successfully!');
+            alert('Event cancelled successfully!');
             setIsDeleteModalOpen(false);
         } catch (error) {
             console.error('Error:', error);
@@ -250,6 +252,7 @@ const Edit = () => {
         });
 
         try {
+            setIsUpdateLoading(true)
             const response = await axios.put(`${url}/event/update-event/${id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -260,6 +263,8 @@ const Edit = () => {
         } catch (error) {
             console.error('Error:', error);
             alert('Failed to update event. Please try again.');
+        } finally {
+            setIsUpdateLoading(false)
         }
     };
 
@@ -321,8 +326,14 @@ const Edit = () => {
                         >
                             <button>
                                 <Space>
-                                    Update Event
-                                    <DownOutlined />
+                                    {isUpdateLoading ? (
+                                        <>Loading...</>
+                                    ) : (
+                                        <>
+                                            Update Event
+                                            <DownOutlined />
+                                        </>
+                                    )}
                                 </Space>
                             </button>
                         </Dropdown>
@@ -331,19 +342,19 @@ const Edit = () => {
                 {isDeleteModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50">
                         <div className="bg-black rounded-lg p-6 w-[500px] shadow-lg border border-gray-900">
-                            <h2 className="text-xl font-semibold mb-4 text-white">Are you sure you want to delete this event?</h2>
+                            <h2 className="text-xl font-semibold mb-4 text-white">Are you sure you want to cancel this event?</h2>
                             <div className="flex justify-end space-x-4">
                                 <button
                                     onClick={() => setIsDeleteModalOpen(false)}
                                     className="bg-gray-300 text-black py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
                                 >
-                                    Cancel
+                                    Back
                                 </button>
                                 <button
                                     onClick={handleDeleteEvent}
                                     className="bg-red-700 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors"
                                 >
-                                    Delete
+                                    Cancel event
                                 </button>
                             </div>
                         </div>
@@ -522,6 +533,7 @@ const Edit = () => {
                                         <div className="flex-1">
                                             <h3 className="text-xl font-semibold">{ticket.ticketName || ticket.ticket_name}</h3>
                                             <p className="text-lg mt-3">${ticket.price}</p>
+                                            <p className="text-sm mt-1" dangerouslySetInnerHTML={{ __html: ticket.ticketDescription || ticket.ticket_description }}></p>
                                         </div>
                                         <div className="ml-4 flex space-x-2">
                                             <button
@@ -630,7 +642,7 @@ const Edit = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="mb-4 mt-10">
+                                {/* <div className="mb-4 mt-10">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-4">
                                             <input
@@ -666,7 +678,7 @@ const Edit = () => {
                                             </div>
                                         )}
                                     </div>
-                                </div>
+                                </div> */}
                                 <div className="mb-4 mt-10">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-4">
@@ -677,7 +689,7 @@ const Edit = () => {
                                                 onChange={handleLimitChange}
                                             />
                                             <label htmlFor="showValidDates" className="text-gray-400">
-                                                limit Purchase only
+                                                Ticket Purchase limit
                                             </label>
                                         </div>
                                         {limit && (
@@ -810,7 +822,7 @@ const Edit = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="mb-4 mt-10">
+                                {/* <div className="mb-4 mt-10">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-4">
                                             <input
@@ -852,7 +864,7 @@ const Edit = () => {
                                             </div>
                                         )}
                                     </div>
-                                </div>
+                                </div> */}
                                 <div className="mb-4 mt-10">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-4">
@@ -915,7 +927,7 @@ const Edit = () => {
                         </div>
                     )}
                 </div>
-                <div className="flex justify-center items-center bg-black text-white p-4">
+                {/* <div className="flex justify-center items-center bg-black text-white p-4">
                     <div className="w-full max-w-3xl bg-black rounded-lg shadow-md p-6">
                         <div
                             className="flex justify-between items-center cursor-pointer mb-4 border-b border-gray-600 pb-2"
@@ -978,7 +990,7 @@ const Edit = () => {
                             </>
                         )}
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );

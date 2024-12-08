@@ -4,6 +4,7 @@ import SidebarComponent from "../../components/layouts/SidebarComponent";
 import axios from "axios";
 import url from "../../constants/url";
 import { FaCopy } from "react-icons/fa";
+import { MdCopyAll } from "react-icons/md";
 
 const Profile = () => {
   const [copied, setCopied] = useState(false);
@@ -11,7 +12,14 @@ const Profile = () => {
   const [organizer, setOrganizer] = useState({
     bio: "",
     name: "",
+    email: "",
+    phone: "",
+    instagram: "",
+    twitter: "",
+    website: ""
   });
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null)
 
 
   const handleCopy = (e) => {
@@ -64,18 +72,50 @@ const Profile = () => {
   }, [oragnizerId]);
 
   const handleUpdate = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const response = await axios.put(`${url}/update-organizer/${oragnizerId}`, {
-        bio: organizer.bio,
-        name: organizer.name,
+      const formData = new FormData();
+      formData.append('bio', organizer.bio);
+      formData.append('name', organizer.name);
+      formData.append('email', organizer.email);
+      formData.append('phone', organizer.phone);
+      formData.append('instagram', organizer.instagram);
+      formData.append('twitter', organizer.twitter);
+      formData.append('website', organizer.website);
+
+      if (profilePhoto) {
+        formData.append('profile_image', profilePhoto || organizer.profile_image);
+      }
+
+      const response = await axios.put(`${url}/update-organizer/${oragnizerId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
       alert("Organizer updated successfully!");
-      window.location.reload()
+      window.location.reload();
     } catch (error) {
       console.error("Error updating organizer:", error);
       alert("Failed to update organizer. Please try again.");
     }
+  };
+
+
+  const handleImageUpload = (event) => {
+    const file_upload = event.target.files[0];
+    setProfilePhoto(file_upload)
+
+    if (file_upload) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result);
+      };
+      reader.readAsDataURL(file_upload);
+    }
+  };
+
+  const triggerFileInput = () => {
+    document.getElementById("profilePhotoInput").click();
   };
 
   return (
@@ -86,12 +126,13 @@ const Profile = () => {
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-semibold text-white">Profile</h1>
 
-            <a
+            <button
+              onClick={handleUpdate}
               className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
               href="/create-event"
             >
-              Manage
-            </a>
+              Update
+            </button>
           </div>
           <div className="overflow-y-auto no-scrollbar">
             <form>
@@ -143,19 +184,29 @@ const Profile = () => {
                     </div> */}
                     <div className="col-span-full">
                       <div className="flex items-center gap-x-3">
-                        <svg
-                          className="size-40 text-gray-300"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          aria-hidden="true"
-                          data-slot="icon"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                        <div onClick={triggerFileInput} className="cursor-pointer">
+                          {profilePhoto || organizer.profile_image ? (
+                            <img
+                              src={selectedImage || organizer.profile_image}
+                              alt="Profile"
+                              className="size-40 rounded-full object-cover"
+                            />
+                          ) : (
+                            <svg
+                              className="size-40 text-gray-300"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              aria-hidden="true"
+                              data-slot="icon"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          )}
+                        </div>
                         <h3 className="text-white text-3xl flex items-center gap-x-2">
                           {organizer.name || ""}
                           <button
@@ -163,17 +214,25 @@ const Profile = () => {
                             className="p-1 rounded hover:bg-gray-700 focus:outline-none"
                             aria-label="Copy text"
                           >
-                            <FaCopy size={16} />
+                            <MdCopyAll size={22} />
                           </button>
                         </h3>
                       </div>
+                      {/* Hidden file input */}
+                      <input
+                        id="profilePhotoInput"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: "none" }}
+                      />
                     </div>
                     <div className="col-span-full px-10">
                       <label
                         htmlFor="about"
                         className="block text-sm/6 font-medium text-gray-200"
                       >
-                        Biography
+                        Description
                       </label>
                       <div className="mt-2">
                         <textarea
@@ -188,23 +247,22 @@ const Profile = () => {
                         ></textarea>
                       </div>
                       <p className="mt-3 text-sm/6 text-gray-400">
-                        Write a few sentences about yourself.
+                        Write a few sentences about organization.
                       </p>
                     </div>
                   </div>
                 </div>
-
-                <div className="border-b border-gray-900/10 pb-12 px-10">
+                <div className="border-b border-gray-900/10 pb-0 px-10">
                   <h2 className="text-base/7 font-semibold text-gray-200">
                     Personal Information
                   </h2>
                   <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                    <div className="sm:col-span-3">
+                    <div className="sm:col-span-6">
                       <label
                         htmlFor="first-name"
                         className="block text-sm/6 font-medium text-gray-200"
                       >
-                        Business Name
+                        Organization Name
                       </label>
                       <div className="mt-2">
                         <input
@@ -220,8 +278,7 @@ const Profile = () => {
                         />
                       </div>
                     </div>
-
-                    <div className="sm:col-span-3">
+                    {/* <div className="sm:col-span-3">
                       <label
                         htmlFor="last-name"
                         className="block text-sm/6 font-medium text-gray-200"
@@ -239,13 +296,133 @@ const Profile = () => {
                           className="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-500 text-gray-900 focus:outline-none shadow-sm placeholder:text-gray-400 sm:text-sm/6"
                         />
                       </div>
+                    </div> */}
+                  </div>
+                </div>
+                <div className="border-b border-gray-900/10 pb-0 px-10">
+                  <h2 className="text-base/7 font-semibold text-gray-200">
+                    Contact Information
+                  </h2>
+                  <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                    <div className="sm:col-span-3">
+                      <label
+                        htmlFor="first-name"
+                        className="block text-sm/6 font-medium text-gray-200"
+                      >
+                        Email ID
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="first-name"
+                          id="first-name"
+                          value={organizer.email || ""}
+                          onChange={(e) =>
+                            setOrganizer((prev) => ({ ...prev, email: e.target.value }))
+                          }
+                          autoComplete="given-name"
+                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-200 px-3 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                        />
+                      </div>
                     </div>
 
+                    <div className="sm:col-span-3">
+                      <label
+                        htmlFor="last-name"
+                        className="block text-sm/6 font-medium text-gray-200"
+                      >
+                        Mobile Number
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="last-name"
+                          id="last-name"
+                          value={organizer.phone || ""}
+                          onChange={(e) =>
+                            setOrganizer((prev) => ({ ...prev, phone: e.target.value }))
+                          }
+                          autoComplete="family-name"
+                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-200 px-3 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="border-b border-gray-900/10 pb-12 px-10">
+                  <h2 className="text-base/7 font-semibold text-gray-200">
+                    Social Media Links
+                  </h2>
+                  <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                    <div className="sm:col-span-2">
+                      <label
+                        htmlFor="first-name"
+                        className="block text-sm/6 font-medium text-gray-200"
+                      >
+                        Instagram URL
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="first-name"
+                          id="first-name"
+                          value={organizer.instagram || ""}
+                          onChange={(e) =>
+                            setOrganizer((prev) => ({ ...prev, instagram: e.target.value }))
+                          }
+                          autoComplete="given-name"
+                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-200 px-3 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label
+                        htmlFor="last-name"
+                        className="block text-sm/6 font-medium text-gray-200"
+                      >
+                        X URL
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="last-name"
+                          id="last-name"
+                          value={organizer.twitter || ""}
+                          onChange={(e) =>
+                            setOrganizer((prev) => ({ ...prev, twitter: e.target.value }))
+                          }
+                          autoComplete="family-name"
+                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-200 px-3 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label
+                        htmlFor="last-name"
+                        className="block text-sm/6 font-medium text-gray-200"
+                      >
+                        Website URL
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="last-name"
+                          id="last-name"
+                          value={organizer.website || ""}
+                          onChange={(e) =>
+                            setOrganizer((prev) => ({ ...prev, website: e.target.value }))
+                          }
+                          autoComplete="family-name"
+                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-200 px-3 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-end gap-x-6">
+              {/* <div className="mt-6 flex items-center justify-end gap-x-6">
                 <button
                   type="button"
                   className="text-sm/6 font-semibold text-gray-200"
@@ -258,7 +435,7 @@ const Profile = () => {
                 >
                   Update
                 </button>
-              </div>
+              </div> */}
             </form>
           </div>
         </div>

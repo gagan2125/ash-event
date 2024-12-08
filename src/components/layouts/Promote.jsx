@@ -31,7 +31,7 @@ const Promote = () => {
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <p className="text-sm leading-6 text-gray-900">
-              <strong className="font-semibold">Asana 2024</strong>
+              <strong className="font-semibold">Avenue</strong>
               <svg
                 viewBox="0 0 2 2"
                 aria-hidden="true"
@@ -39,14 +39,14 @@ const Promote = () => {
               >
                 <circle r={1} cx={1} cy={1} />
               </svg>
-              Join as an event organizer to host an event
+              book your events and create your events 
             </p>
-            <a
+            {/* <a
               href="/dashboard"
               className="flex-none rounded-full bg-primary px-3.5 py-1 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
             >
               Join now <span aria-hidden="true">&rarr;</span>
-            </a>
+            </a> */}
           </div>
           <div className="flex flex-1 justify-end">
             <button

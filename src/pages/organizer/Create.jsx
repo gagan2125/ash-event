@@ -6,6 +6,8 @@ import "react-quill/dist/quill.snow.css";
 import url from "../../constants/url"
 import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
+import { IoMdArrowDropdown } from "react-icons/io";
+import { Loader } from 'rsuite';
 
 const Create = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -46,6 +48,8 @@ const Create = () => {
   const [isExplore, setIsExplore] = useState(true);
   const [file, setFile] = useState(null);
   const [accountId, setAccountId] = useState("");
+
+  const [isAddLoading, setIsAddLoading] = useState(false)
 
   const items = [
     ...(accountId
@@ -219,6 +223,7 @@ const Create = () => {
     });
 
     try {
+      setIsAddLoading(true)
       const response = await axios.post(`${url}/event/add-event`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -229,6 +234,8 @@ const Create = () => {
     } catch (error) {
       console.error('Error:', error);
       alert('Failed to add event. Please try again.');
+    } finally {
+      setIsAddLoading(false)
     }
   };
 
@@ -267,8 +274,16 @@ const Create = () => {
           >
             <button>
               <Space>
-                Create Event
-                <DownOutlined />
+                {isAddLoading ? (
+                  <>
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    Create Event
+                    <IoMdArrowDropdown />
+                  </>
+                )}
               </Space>
             </button>
           </Dropdown>
@@ -447,6 +462,7 @@ const Create = () => {
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold">{ticket.ticketName}</h3>
                       <p className="text-lg mt-3">${ticket.price}</p>
+                      <p className="text-sm mt-1" dangerouslySetInnerHTML={{ __html: ticket.ticketDescription }}></p>
                     </div>
                     <div className="ml-4 flex space-x-2">
                       <button
@@ -566,7 +582,7 @@ const Create = () => {
                         onChange={handleLimitChange}
                       />
                       <label htmlFor="showValidDates" className="text-gray-400">
-                        limit Purchase only
+                        Ticket Purchase limit
                       </label>
                     </div>
                     {limit && (

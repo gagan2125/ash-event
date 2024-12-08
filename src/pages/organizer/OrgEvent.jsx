@@ -7,6 +7,7 @@ import url from "../../constants/url"
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { DownOutlined, SettingOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
+import { MdQrCodeScanner } from "react-icons/md";
 
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -135,7 +136,6 @@ const OrgEvent = () => {
     return `${day} ${month} ${year} ${time}`;
   };
 
-
   return (
     <>
       <div className="flex h-screen bg-black">
@@ -143,13 +143,17 @@ const OrgEvent = () => {
         <div className="flex-1 flex flex-col p-10 overflow-y-auto no-scrollbar">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-semibold text-white">Events</h1>
-
-            <a
-              className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
-              href="/create-event"
-            >
-              + Add Event
-            </a>
+            <div className="flex justify-between items-center gap-4">
+              <a
+                className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                href="/create-event"
+              >
+                + Add Event
+              </a>
+              <a href="/qr-scanner">
+                <MdQrCodeScanner color="white" size={24} />
+              </a>
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 mt-8">
             {cards.map((card, index) => (

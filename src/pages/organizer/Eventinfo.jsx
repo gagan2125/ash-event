@@ -18,7 +18,7 @@ import { Bar, Line } from "react-chartjs-2";
 import { FaSearch } from "react-icons/fa";
 import axios from "axios";
 import url from "../../constants/url";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PiDotsThreeVertical } from "react-icons/pi";
 
 ChartJS.register(
@@ -34,6 +34,7 @@ ChartJS.register(
 
 const Eventinfo = () => {
     const { id } = useParams()
+    const navigate = useNavigate();
     const [event, setEvent] = useState([]);
     const [loading, setLoading] = useState(true);
     const [accountId, setAccountId] = useState("");
@@ -220,12 +221,26 @@ const Eventinfo = () => {
                             <div className="flex-1 flex flex-col p-10 overflow-y-auto no-scrollbar">
                                 <div className="flex justify-between items-center mb-4">
                                     <h1 className="text-3xl font-semibold text-white">{event.event_name}</h1>
-                                    <a
-                                        className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
-                                        href={`/edit-event/${id}`}
-                                    >
-                                        Manage Event
-                                    </a>
+                                    <div className="flex justify-between items-center mb-4 gap-2">
+                                        <a
+                                            className="bg-black text-white font-semibold py-2 px-4 rounded-md transition-colors"
+                                            href={`/tickets/${id}`}
+                                        >
+                                            Scanned Tickets
+                                        </a>
+                                        <a
+                                            className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                                            href={`/event-preview/${id}`}
+                                        >
+                                            View Event
+                                        </a>
+                                        <a
+                                            className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                                            href={`/edit-event/${id}`}
+                                        >
+                                            Update Event
+                                        </a>
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
                                     <div
@@ -324,15 +339,13 @@ const Eventinfo = () => {
                                             book.map((payout, index) => {
                                                 return (
                                                     <li
+                                                        onClick={() => navigate(`/ticket-info/${payout._id}`)}
                                                         key={index}
                                                         className="bg-[#101010] p-4 rounded-lg flex justify-between hover:border hover:border-gray-700"
                                                     >
                                                         <div>
                                                             <p className="text-lg text-white font- mb-2">{payout.user_id.firstName} {payout.user_id.lastName}</p>
-                                                            <p className="text-sm text-gray-400">Transaction ID: {payout.transaction_id}</p>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-lg text-white font-medium mb-2">${(payout.amount / 100).toFixed(2)}</p>
+                                                            <p className="text-sm text-gray-300 mb-1">{payout.email}</p>
                                                             <p className="text-sm text-gray-400">
                                                                 {new Date(payout.date).toLocaleDateString('en-GB', {
                                                                     day: '2-digit',
@@ -346,6 +359,25 @@ const Eventinfo = () => {
                                                                     hour12: true,
                                                                 })}
                                                             </p>
+                                                            {/* <p className="text-sm text-gray-400">Transaction ID: {payout.transaction_id}</p> */}
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-xl text-white font-medium mb-2">${(payout.amount / 100).toFixed(2)}</p>
+                                                            <p className="text-sm text-gray-600 font-medium mb-2">{payout.qr_status === 'true' ? "Checked In" : ""}</p>
+                                                            <div className="flex justify-between items-center gap-2 mt-3">
+                                                                <a
+                                                                    className="bg-gray-300 text-black font-medium py-1 px-2 text-sm rounded-md hover:bg-gray-400 transition-colors"
+                                                                    href=''
+                                                                >
+                                                                    Send Ticket
+                                                                </a>
+                                                                <a
+                                                                    className="bg-red-800 text-white font-medium py-1 px-2 text-sm rounded-md hover:bg-red-900 transition-colors"
+                                                                    href=''
+                                                                >
+                                                                    Refund
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </li>
                                                 );

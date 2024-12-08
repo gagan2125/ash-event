@@ -34,6 +34,10 @@ import MyProfile from "./pages/MyProfile";
 import Success from "./pages/Success";
 import ProfileUrl from './pages/organizer/ProfileUrl'
 import Members from "./pages/organizer/Members"
+import EventPreview from "./pages/organizer/EventPreview";
+import QrScan from "./pages/organizer/QrScan";
+import Tickets from "./pages/organizer/Tickets";
+import TicketInfo from "./pages/organizer/TicketInfo";
 
 function App() {
   const location = useLocation();
@@ -57,7 +61,10 @@ function App() {
     '/event-info',
     '/success',
     '/profile-url',
-    '/members'
+    '/members',
+    '/qr-scanner',
+    '/tickets',
+    '/ticket-info'
   ];
 
   const shouldHideNavbarAndFooter = hideNavbarAndFooterPaths.some((path) =>
@@ -104,7 +111,11 @@ function App() {
         <Route path="/event-info/:id" element={<Eventinfo />} />
         <Route path="/my-profile" element={<MyProfile />} />
         <Route path="/profile-url/:id/:name" element={<ProfileUrl />} />
-        <Route path="/members" element={<Members/>} />
+        <Route path="/members" element={<Members />} />
+        <Route path="/event-preview/:id" element={<EventPreview />} />
+        <Route path="/qr-scanner" element={<QrScan />} />
+        <Route path="/tickets/:id" element={<Tickets />} />
+        <Route path="/ticket-info/:id" element={<TicketInfo />} />
       </Routes>
       {!shouldHideNavbarAndFooter && <Footer />}
     </div>

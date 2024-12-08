@@ -102,7 +102,7 @@ const Checkout = () => {
 
     try {
       const response = await axios.post(`${url}/create-payment-intent`, {
-        amount: Math.round(parseFloat(calculateTotal()) * 100),
+        amount: Math.round(parseFloat(count * selectedTicketPrice) * 100),
         organizerId: organizerId,
         userId: userId,
         eventId: eventId,
@@ -183,6 +183,7 @@ const Checkout = () => {
           title: 'Successfully Updated Profile',
           content: 'continue with you booking',
           onOk: () => {
+            setDetails(false);
             window.location.reload()
           },
           okButtonProps: {
@@ -260,21 +261,25 @@ const Checkout = () => {
           </button>
         </div>
       </form>
-      <form className="w-full max-w-md mt-4">
-        <div className="bg-[#0b0b0b] p-4 rounded-lg">
-          <label className="text-white block">Basic Info</label>
-          <div className="flex justify-between items-center pt-4">
-            <span className="text-white">{formData.firstName}</span>
-            <button
-              type="button"
-              className="text-blue-500 hover:text-blue-700 font-medium"
-              onClick={() => setBasicModal(true)}
-            >
-              Edit
-            </button>
-          </div>
-        </div>
-      </form>
+      {userName && (
+        <>
+          <form className="w-full max-w-md mt-4">
+            <div className="bg-[#0b0b0b] p-4 rounded-lg">
+              <label className="text-white block">Basic Info</label>
+              <div className="flex justify-between items-center pt-4">
+                <span className="text-white">{formData.firstName}</span>
+                <button
+                  type="button"
+                  className="text-blue-500 hover:text-blue-700 font-medium"
+                  onClick={() => setBasicModal(true)}
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      )}
 
       <div>
         {details && (
@@ -316,12 +321,12 @@ const Checkout = () => {
                     </button>
                   </div>
                 </div>
-                {/* <button
+                <button
                   onClick={() => setDetails(false)}
                   className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
                 >
                   ✖
-                </button> */}
+                </button>
               </div>
             </div>
           </>
