@@ -336,6 +336,7 @@ const CreateUserEvent = () => {
         },
       });
       window.location.href = "/org-event";
+      localStorage.setItem('initialEvent', response.data.event._id);
     } catch (error) {
       console.error('Error:', error);
       alert('Failed to add event. Please try again.');

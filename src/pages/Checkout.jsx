@@ -68,6 +68,9 @@ const Checkout = () => {
     setUserId(storedUserId);
     setUserName(userName)
     setOrganizerId(storedOrganizerId);
+    if (!userName) {
+      setDetails(true);
+    }
   }, []);
 
   const formatDate = (dateString) => {
@@ -89,11 +92,6 @@ const Checkout = () => {
     event.preventDefault();
 
     if (!stripe || !elements) {
-      return;
-    }
-
-    if (!userName) {
-      setDetails(true);
       return;
     }
 
@@ -234,53 +232,56 @@ const Checkout = () => {
           <span className="text-white font-bold">${calculateTotal()}</span>
         </div>
       </div>
-      <form onSubmit={handlePayment} className="w-full max-w-md mt-4">
-        <div className="bg-[#0b0b0b] p-4 rounded-lg">
-          <label className="text-white block mb-2">
-            Card Details
-          </label>
-          <div className="bg-[#1a1a1a] p-3 rounded">
-            <CardElement options={cardElementOptions} />
-          </div>
+      {
+        userName && (
+          <>
+            <form onSubmit={handlePayment} className="w-full max-w-md mt-4">
+              <div className="bg-[#0b0b0b] p-4 rounded-lg">
+                <label className="text-white block mb-2">
+                  Card Details
+                </label>
+                <div className="bg-[#1a1a1a] p-3 rounded">
+                  <CardElement options={cardElementOptions} />
+                </div>
 
-          {paymentError && (
-            <div className="text-red-500 mt-2 text-sm">
-              {paymentError}
-            </div>
-          )}
+                {paymentError && (
+                  <div className="text-red-500 mt-2 text-sm">
+                    {paymentError}
+                  </div>
+                )}
 
-          <button
-            type="submit"
-            disabled={!stripe || paymentProcessing}
-            className={`w-full mt-4 py-3 rounded-lg font-bold ${paymentProcessing
-              ? 'bg-gray-600 cursor-not-allowed'
-              : 'bg-primary hover:bg-[#171717]'
-              } text-white`}
-          >
-            {paymentProcessing ? 'Processing...' : `Pay $${calculateTotal()}`}
-          </button>
-        </div>
-      </form>
-      {userName && (
-        <>
-          <form className="w-full max-w-md mt-4">
-            <div className="bg-[#0b0b0b] p-4 rounded-lg">
-              <label className="text-white block">Basic Info</label>
-              <div className="flex justify-between items-center pt-4">
-                <span className="text-white">{formData.firstName}</span>
                 <button
-                  type="button"
-                  className="text-blue-500 hover:text-blue-700 font-medium"
-                  onClick={() => setBasicModal(true)}
+                  type="submit"
+                  disabled={!stripe || paymentProcessing}
+                  className={`w-full mt-4 py-3 rounded-lg font-bold ${paymentProcessing
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : 'bg-primary hover:bg-[#171717]'
+                    } text-white`}
                 >
-                  Edit
+                  {paymentProcessing ? 'Processing...' : `Pay $${calculateTotal()}`}
                 </button>
               </div>
-            </div>
-          </form>
-        </>
-      )}
-
+            </form>
+          </>
+        )
+      }
+      <form className="w-full max-w-md mt-4">
+        <div className="bg-[#0b0b0b] p-4 rounded-lg">
+          <div className="flex justify-between items-center">
+            <label className="text-white block">Basic Info</label>
+            <button
+              type="button"
+              className="text-blue-500 hover:text-blue-700 font-medium"
+              onClick={() => setBasicModal(true)}
+            >
+              Edit
+            </button>
+          </div>
+          <div className="flex justify-between items-center pt-4">
+            <span className="text-white">{formData.firstName}</span>
+          </div>
+        </div>
+      </form>
       <div>
         {details && (
           <>

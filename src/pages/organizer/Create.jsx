@@ -8,6 +8,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
 import { IoMdArrowDropdown } from "react-icons/io";
 import { Loader } from 'rsuite';
+import SidebarComponent from "../../components/layouts/SidebarComponent";
 
 const Create = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -253,6 +254,7 @@ const Create = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <SidebarComponent />
       <div className="flex flex-col p-10">
         <div className="flex justify-between items-center">
           <a href="/org-event" className="text-xl font-semibold underline cursor-pointer">

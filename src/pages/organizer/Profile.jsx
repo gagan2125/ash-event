@@ -16,7 +16,8 @@ const Profile = () => {
     phone: "",
     instagram: "",
     twitter: "",
-    website: ""
+    website: "",
+    url: ""
   });
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null)
@@ -24,7 +25,7 @@ const Profile = () => {
 
   const handleCopy = (e) => {
     e.preventDefault();
-    const formattedName = organizer.name.replace(/\s+/g, '-');
+    const formattedName = organizer.url.replace(/\s+/g, '-');
     navigator.clipboard.writeText(`http://localhost:5173/profile-url/${organizer._id}/${formattedName}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -82,6 +83,7 @@ const Profile = () => {
       formData.append('instagram', organizer.instagram);
       formData.append('twitter', organizer.twitter);
       formData.append('website', organizer.website);
+      formData.append('url', organizer.url);
 
       if (profilePhoto) {
         formData.append('profile_image', profilePhoto || organizer.profile_image);
@@ -249,6 +251,40 @@ const Profile = () => {
                       <p className="mt-3 text-sm/6 text-gray-400">
                         Write a few sentences about organization.
                       </p>
+                    </div>
+                  </div>
+                </div><div className="border-b border-gray-900/10 pb-0 px-10">
+                  <h2 className="text-base/7 font-semibold text-gray-200">
+                    Custom Profile URL
+                  </h2>
+                  <div className="mt-5 grid grid-cols-1 gap-y-8 sm:grid-cols-6">
+                    <div className="sm:col-span-2">
+                      <label
+                        htmlFor="first-name"
+                        className="block text-sm/6 font-medium text-gray-200 mt-3"
+                      >
+                        http://localhost:5173/
+                      </label>
+                    </div>
+                    <div className="sm:col-span-3">
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="first-name"
+                          id="first-name"
+                          value={organizer.url || ""}
+                          onChange={(e) => {
+                            const regex = /^[a-z1-9\-]*$/;
+                            const value = e.target.value;
+                            if (regex.test(value)) {
+                              setOrganizer((prev) => ({ ...prev, url: value }));
+                            }
+                          }}
+                          autoComplete="given-name"
+                          className="block w-full rounded-md bg-black border-0 py-1.5 text-gray-200 px-3 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm/6"
+                          placeholder="Enter lowercase and special characters"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

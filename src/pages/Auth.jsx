@@ -37,12 +37,19 @@ const Auth = ({ navigation }) => {
       const response = await axios.post(`${url}/auth/verify-otp`, { phoneNumber: numberWithCode, otp });
 
       if (response.data.success) {
-        const { userID, authToken } = response.data;
+        const { userID, authToken, user, organizer } = response.data;
 
         if (userID && authToken) {
           localStorage.setItem('userID', userID);
           localStorage.setItem('authToken', authToken);
-
+          if (user.firstName) {
+            localStorage.setItem('userName', user.firstName)
+          }
+          if(organizer){
+            localStorage.setItem('organizerId', organizer._id);
+            localStorage.setItem('accountId', organizer.stripeAccountId);
+          }
+          
           Modal.success({
             title: 'Successfully Logged in',
             content: 'continue your browsing events',
