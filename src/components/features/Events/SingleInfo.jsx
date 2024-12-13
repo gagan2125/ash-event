@@ -130,6 +130,137 @@ const SingleInfo = () => {
 
       <div className="relative isolate overflow-hidden px-6 py-24 sm:py-20 lg:overflow-visible lg:px-0 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-start gap-y-10 lg:gap-y-0 lg:gap-x-0">
+
+          <div>
+            <div className="max-w-screen-2xl mb-10">
+
+              <div class="flex flex-wrap items-center justify-between text-white rounded-lg shadow-md">
+                <div class="flex items-center space-x-4">
+                  <div class="bg-gray-50 rounded-full overflow-hidden">
+                    <img className="size-20 rounded-full object-cover" src={event?.organizer_id?.profile_image || "https://cdn-icons-png.flaticon.com/512/6522/6522516.png"} />
+                  </div>
+
+                  <div class="flex flex-col">
+                    <h3 class="text-xl font-semibold">{event?.organizer_id?.name}</h3>
+                    <a href="profile_link_here" class="text-sm text-gray-400 hover:underline">Visit Profile</a>
+                  </div>
+                </div>
+                <div class="flex space-x-4">
+                  <a href="https://img.freepik.com/premium-vector/logo-instagram-icons-instgagram_1367689-33.jpg?semt=ais_hybrid" target="_blank" class="text-xl hover:text-yellow-300">
+                    <i class="fab fa-instagram"></i>
+                  </a>
+                  <a href="https://static.vecteezy.com/system/resources/previews/031/737/206/non_2x/twitter-new-logo-twitter-icons-new-twitter-logo-x-2023-x-social-media-icon-free-png.png" target="_blank" class="text-xl hover:text-yellow-300">
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                </div>
+              </div>
+
+              {/* <p className="text-base font-semibold leading-7 text-secondary">
+                Fast Filling
+              </p> */}
+              <h1 className="mt-8 text-pretty text-4xl font-semibold tracking-tight text-gray-100 sm:text-5xl">
+                {event.event_name}
+              </h1>
+              <p className="text-sm leading-8 text-yellow-300">
+                {formatDate(event.start_date)} - {formatDate(event.end_date)}
+              </p>
+              <p className="mt-2 text-lg leading-8 text-gray-300">
+                {event.venue_name}
+              </p>
+              <div className="flex flex-wrap justify-start gap-4 mb-4 sm:flex-row mt-2">
+                <div className="text-white flex items-center justify-center rounded-md shadow-md">
+                  <MdLocationOn className="mr-1" />
+                  <span className="text-center text-sm">{event.address}</span>
+                </div>
+              </div>
+              <div className="bg-[#2c2c2c] p-3 rounded-lg shadow-md flex justify-between items-center w-full sm:w-full">
+                <span className="text-md font-bold text-gray-200">Starting at: ${event.ticket_start_price}</span>
+                {
+                  userId ? (
+                    <>
+                      <h3
+                        onClick={togglePopup}
+                        className="text-black bg-gray-200 flex gap-2 p-2 px-7 rounded-full font-bold text-md cursor-pointer hover:bg-gray-300"
+                      >
+                        <span>
+                          <BiPurchaseTagAlt className="mt-1" size={20} />
+                        </span>
+                        Book Now
+                      </h3>
+                    </>
+                  ) : (
+                    <>
+                      <h3
+                        onClick={loginDirect}
+                        className="text-black bg-gray-200 flex gap-2 p-2 px-7 rounded-full font-bold text-md cursor-pointer hover:bg-gray-300"
+                      >
+                        <span>
+                          <BiPurchaseTagAlt className="mt-1" size={20} />
+                        </span>
+                        Login & Book
+                      </h3>
+                    </>
+                  )
+                }
+              </div>
+            </div>
+
+            <div className="mt-0">
+              <h3 className="text-2xl font-medium leading-7 text-white mb-6">
+                About
+              </h3>
+              <p
+                className="text-md font-medium leading-7 text-gray-400"
+                style={{
+                  maxWidth: "100%",
+                  overflowWrap: "break-word",
+                  wordWrap: "break-word",
+                }}
+                dangerouslySetInnerHTML={{ __html: event.event_description }}
+              ></p>
+              <div className="flex flex-wrap justify-start gap-4 mb-4 sm:flex-row mt-2">
+                <div className="text-gray-400 flex items-center justify-center rounded-md shadow-md">
+                  <IoMdInformationCircleOutline className="mr-1" />
+                  <span className="text-center text-sm">
+                    Presentato da Live Srl.
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap justify-start gap-4 mb-4 sm:flex-row mt-2">
+                <div className="text-gray-400 flex items-center justify-center rounded-md shadow-md">
+                  <TfiAnnouncement className="mr-1" />
+                  <span className="text-center text-sm">
+                    Questo è un evento 16+
+                  </span>
+                </div>
+              </div>
+              <hr className="my-12 border-t border-[#3f3f3f] w-5/5" />
+            </div>
+            <div className="mt-0">
+              <h3 className="text-xl font-medium leading-7 text-white mb-2">
+                Venue
+              </h3>
+              <p className="text-3xl font-medium leading-7 text-gray-50 mb-2">
+                {event.venue_name}
+              </p>
+              <p className="text-sm font-medium leading-7 text-gray-50">
+                {event.address}
+              </p>
+              <div className="flex flex-wrap justify-start gap-4 mb-4 sm:flex-row mt-2">
+                <div className="flex items-center justify-center rounded-md shadow-md">
+                  <LuDoorOpen className="mr-1 text-gray-400" />
+                  <p className="text-gray-500 text-md">
+                    Doors Open{" "}
+                    <span className="text-nowrap text-white text-lg">
+                      {event.open_time}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <hr className="my-12 border-t border-[#3f3f3f] w-5/5" />
+            </div>
+          </div>
+
           <div className="flex justify-center lg:justify-center lg:sticky lg:top-4 flex-col items-center lg:items-center">
             <img
               alt=""
@@ -248,114 +379,6 @@ const SingleInfo = () => {
               </div>
             </div>
           )}
-
-          <div>
-            <div className="max-w-screen-2xl mb-10">
-              <p className="text-base font-semibold leading-7 text-secondary">
-                Fast Filling
-              </p>
-              <h1 className="mt-2 text-pretty text-4xl font-semibold tracking-tight text-gray-100 sm:text-5xl">
-                {event.event_name}
-              </h1>
-              <p className="mt-2 text-lg leading-8 text-gray-300">
-                {event.venue_name}
-              </p>
-              <p className="text-lg leading-8 text-yellow-300">
-                {formatDate(event.start_date)}
-              </p>
-              <div className="flex flex-wrap justify-start gap-4 mb-4 sm:flex-row mt-2">
-                <div className="text-white flex items-center justify-center rounded-md shadow-md">
-                  <MdLocationOn className="mr-1" />
-                  <span className="text-center text-sm">{event.address}</span>
-                </div>
-              </div>
-              <div className="bg-[#2c2c2c] p-3 rounded-lg shadow-md flex justify-between items-center w-full sm:w-full">
-                <span className="text-md font-bold text-gray-200">Starting at: ${event.ticket_start_price}</span>
-                {
-                  userId ? (
-                    <>
-                      <h3
-                        onClick={togglePopup}
-                        className="text-black bg-gray-200 flex gap-2 p-2 px-7 rounded-full font-bold text-md cursor-pointer hover:bg-gray-300"
-                      >
-                        <span>
-                          <BiPurchaseTagAlt className="mt-1" size={20} />
-                        </span>
-                        Book Now
-                      </h3>
-                    </>
-                  ) : (
-                    <>
-                      <h3
-                        onClick={loginDirect}
-                        className="text-black bg-gray-200 flex gap-2 p-2 px-7 rounded-full font-bold text-md cursor-pointer hover:bg-gray-300"
-                      >
-                        <span>
-                          <BiPurchaseTagAlt className="mt-1" size={20} />
-                        </span>
-                        Login & Book
-                      </h3>
-                    </>
-                  )
-                }
-              </div>
-            </div>
-
-            <div className="mt-0">
-              <h3 className="text-2xl font-medium leading-7 text-white mb-6">
-                About
-              </h3>
-              <p
-                className="text-md font-medium leading-7 text-gray-400"
-                style={{
-                  maxWidth: "100%",
-                  overflowWrap: "break-word",
-                  wordWrap: "break-word",
-                }}
-                dangerouslySetInnerHTML={{ __html: event.event_description }}
-              ></p>
-              <div className="flex flex-wrap justify-start gap-4 mb-4 sm:flex-row mt-2">
-                <div className="text-gray-400 flex items-center justify-center rounded-md shadow-md">
-                  <IoMdInformationCircleOutline className="mr-1" />
-                  <span className="text-center text-sm">
-                    Presentato da Live Srl.
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-wrap justify-start gap-4 mb-4 sm:flex-row mt-2">
-                <div className="text-gray-400 flex items-center justify-center rounded-md shadow-md">
-                  <TfiAnnouncement className="mr-1" />
-                  <span className="text-center text-sm">
-                    Questo è un evento 16+
-                  </span>
-                </div>
-              </div>
-              <hr className="my-12 border-t border-[#3f3f3f] w-5/5" />
-            </div>
-            <div className="mt-0">
-              <h3 className="text-xl font-medium leading-7 text-white mb-2">
-                Venue
-              </h3>
-              <p className="text-3xl font-medium leading-7 text-gray-50 mb-2">
-                {event.venue_name}
-              </p>
-              <p className="text-sm font-medium leading-7 text-gray-50">
-                {event.address}
-              </p>
-              <div className="flex flex-wrap justify-start gap-4 mb-4 sm:flex-row mt-2">
-                <div className="flex items-center justify-center rounded-md shadow-md">
-                  <LuDoorOpen className="mr-1 text-gray-400" />
-                  <p className="text-gray-500 text-md">
-                    Doors Open{" "}
-                    <span className="text-nowrap text-white text-lg">
-                      {event.open_time}
-                    </span>
-                  </p>
-                </div>
-              </div>
-              <hr className="my-12 border-t border-[#3f3f3f] w-5/5" />
-            </div>
-          </div>
         </div>
       </div>
     </div>

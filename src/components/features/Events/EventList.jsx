@@ -3,11 +3,19 @@ import url from "../../../constants/url";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
+import { Slider, Switch } from 'antd';
 
 
 const EventList = () => {
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isSliderOpen, setIsSliderOpen] = useState(false);
+  const [sliderValue, setSliderValue] = useState([0, 100]);
 
   const fetchEvents = async () => {
     try {
@@ -104,21 +112,101 @@ const EventList = () => {
   //   },
   // ];
 
+  const toggleCalendar = () => {
+    setIsCalendarOpen((prev) => !prev);
+    setIsSliderOpen(false)
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setIsCalendarOpen(false);
+  };
+
+  const toggleSlider = () => {
+    setIsSliderOpen(!isSliderOpen);
+    setIsCalendarOpen(false)
+  };
+
+  const handleSliderChange = (value) => {
+    setSliderValue(value);
+  };
+
+  const formatDisplayValue = (value) => {
+    const formattedValue = value.map((val) => (val === 0 ? "Free" : val === 100 ? "All" : val));
+    return `${formattedValue[0]} - ${formattedValue[1]}`;
+  };
+
+  const filteredEvents = events.filter((event) => {
+    const eventDate = new Date(event.start_date);
+    const minPrice = sliderValue[0];
+    const maxPrice = sliderValue[1];
+  
+    const isWithinPriceRange =
+      (event.ticket_start_price || 0) >= minPrice &&
+      (event.ticket_start_price || 0) <= maxPrice;
+  
+    return (
+      event.explore === "YES" &&
+      (!selectedDate || eventDate.toDateString() === selectedDate.toDateString()) &&
+      isWithinPriceRange
+    );
+  });
+  
+
   return (
     <div className="bg-primary py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap justify-start gap-4 mb-14 sm:flex-row">
-          <div className="w-24 h-12 bg-[#222222] text-white flex items-center justify-center rounded-md shadow-md">
-            <MdLocationOn className="mr-1" />
-            <span className="text-center text-sm">Location</span>
-          </div>
-          <div className="w-24 h-12 bg-[#222222] text-white flex items-center justify-center rounded-md shadow-md">
-            <MdDateRange className="mr-1" />
-            <span className="text-center text-sm">Date</span>
-          </div>
-          <div className="w-24 h-12 bg-[#222222] text-white flex items-center justify-center rounded-md shadow-md">
+        <div className="flex flex-wrap justify-start gap-4 mb-14 sm:flex-row relative">
+          <div
+            className="inline-flex items-center bg-[#222222] text-white px-4 h-12 rounded-md shadow-md cursor-pointer"
+            onClick={toggleSlider}
+          >
             <MdAttachMoney className="mr-1" />
-            <span className="text-center text-sm">Price</span>
+            <span className="text-sm">
+              {sliderValue.length === 2 ? formatDisplayValue(sliderValue) : "Price"}
+            </span>
+          </div>
+          {isSliderOpen && (
+            <div className="absolute top-14 w-1/4 bg-white p-4 rounded-md shadow-md z-50">
+              <Slider
+                range
+                defaultValue={sliderValue}
+                min={0}
+                max={100}
+                onChange={handleSliderChange}
+                className="text-black"
+                tooltip={{
+                  formatter: (val) => (val === 0 ? "Free" : val === 100 ? "All" : val),
+                }}
+              />
+            </div>
+          )}
+
+          <div
+            className="inline-flex items-center bg-[#222222] text-white px-4 h-12 rounded-md shadow-md cursor-pointer"
+            onClick={toggleCalendar}
+          >
+            <MdDateRange className="mr-1" />
+            <span className="text-sm">
+              {selectedDate ? format(selectedDate, "dd MMM yyyy") : "Date"}
+            </span>
+          </div>
+
+          {isCalendarOpen && (
+            <div className="absolute top-16 z-50 bg-white rounded-md shadow-md">
+              <DatePicker
+                selected={selectedDate}
+                onChange={handleDateChange}
+                inline
+                calendarClassName="text-black"
+                minDate={new Date()}
+              />
+            </div>
+          )}
+
+          <div className="inline-flex items-center bg-[#222222] text-white px-4 h-12 rounded-md shadow-md">
+            <MdLocationOn className="mr-1" />
+            <span className="text-sm">Location</span>
           </div>
         </div>
         <div className="flex justify-between items-center">
@@ -128,31 +216,29 @@ const EventList = () => {
           </h2>
         </div>
         <div className="flex justify-center">
-          {events.filter(event => event.explore === "YES").length > 0 ? (
+          {filteredEvents.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {events
-                .filter(event => event.explore === "YES")
-                .map((event, index) => (
-                  <button
-                    onClick={() => handleDetail(event._id, event.event_name.replace(/\s+/g, '-'))}
-                    key={index}
-                    className="rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:-translate-y-2 hover:scale-105"
-                  >
-                    <div className="w-[300px] h-[300px] relative">
-                      <img
-                        src={event.flyer}
-                        alt={event.event_name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="py-4">
-                      <h3 className="text-lg text-white font-semibold">{event.event_name}</h3>
-                      <p className="text-yellow-300">{formatDate(event.start_date)}</p>
-                      <p className="text-gray-300">{event.venue_name}</p>
-                      <p className="text-gray-200 font-bold">Starting: ${event.ticket_start_price}</p>
-                    </div>
-                  </button>
-                ))}
+              {filteredEvents.map((event, index) => (
+                <button
+                  onClick={() => handleDetail(event._id, event.event_name.replace(/\s+/g, "-"))}
+                  key={index}
+                  className="rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:-translate-y-2 hover:scale-105"
+                >
+                  <div className="w-[300px] h-[300px] relative">
+                    <img
+                      src={event.flyer}
+                      alt={event.event_name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="py-2 text-start">
+                    <h3 className="text-2xl text-white font-semibold">{event.event_name}</h3>
+                    <p className="text-yellow-300 text-sm">{formatDate(event.start_date)}</p>
+                    <p className="text-gray-300 text-sm">{event.venue_name}</p>
+                    {/* <p className="text-gray-200 font-bold">Starting: ${event.ticket_start_price}</p> */}
+                  </div>
+                </button>
+              ))}
             </div>
           ) : (
             <div className="text-center text-white mt-8 mb-20">

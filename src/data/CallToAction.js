@@ -1,7 +1,8 @@
-import { PhoneIcon, PlayCircleIcon } from "@heroicons/react/20/solid";
+import { IoMdLogOut } from "react-icons/io";
+import { HiSwitchHorizontal } from "react-icons/hi";
 const callsToAction = [
-  { name: "Watch demo", href: "#", icon: PlayCircleIcon },
-  { name: "Contact sales", href: "#", icon: PhoneIcon },
+  { name: "Switch to Organizer", href: "/dashboard", icon: HiSwitchHorizontal },
+  { name: "Logout", href: "#", icon: IoMdLogOut },
 ];
 
 export default callsToAction;

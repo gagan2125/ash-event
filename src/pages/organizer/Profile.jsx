@@ -241,7 +241,7 @@ const Profile = () => {
                           id="about"
                           name="about"
                           rows="3"
-                          value={organizer.bio || ""}
+                          value={organizer.bio === 'undefined' ? "" : organizer.bio}
                           onChange={(e) =>
                             setOrganizer((prev) => ({ ...prev, bio: e.target.value }))
                           }
@@ -263,7 +263,7 @@ const Profile = () => {
                         htmlFor="first-name"
                         className="block text-sm/6 font-medium text-gray-200 mt-3"
                       >
-                        http://localhost:5173/
+                        https://ash-event.vercel.app/
                       </label>
                     </div>
                     <div className="sm:col-span-3">
@@ -272,7 +272,7 @@ const Profile = () => {
                           type="text"
                           name="first-name"
                           id="first-name"
-                          value={organizer.url || ""}
+                          value={organizer.url === 'undefined' ? "" : organizer.url}
                           onChange={(e) => {
                             const regex = /^[a-z1-9\-]*$/;
                             const value = e.target.value;
@@ -305,7 +305,7 @@ const Profile = () => {
                           type="text"
                           name="first-name"
                           id="first-name"
-                          value={organizer.name || ""}
+                          value={organizer.name === 'undefined' ? "" : organizer.name}
                           onChange={(e) =>
                             setOrganizer((prev) => ({ ...prev, name: e.target.value }))
                           }
@@ -352,7 +352,7 @@ const Profile = () => {
                           type="text"
                           name="first-name"
                           id="first-name"
-                          value={organizer.email || ""}
+                          value={organizer.email === 'undefined' ? "" : organizer.email}
                           onChange={(e) =>
                             setOrganizer((prev) => ({ ...prev, email: e.target.value }))
                           }
@@ -374,7 +374,7 @@ const Profile = () => {
                           type="text"
                           name="last-name"
                           id="last-name"
-                          value={organizer.phone || ""}
+                          value={organizer.phone === 'undefined' ? "" : organizer.phone}
                           onChange={(e) =>
                             setOrganizer((prev) => ({ ...prev, phone: e.target.value }))
                           }
@@ -402,7 +402,7 @@ const Profile = () => {
                           type="text"
                           name="first-name"
                           id="first-name"
-                          value={organizer.instagram || ""}
+                          value={organizer.instagram === 'undefined' ? "" : organizer.instagram}
                           onChange={(e) =>
                             setOrganizer((prev) => ({ ...prev, instagram: e.target.value }))
                           }
@@ -424,7 +424,7 @@ const Profile = () => {
                           type="text"
                           name="last-name"
                           id="last-name"
-                          value={organizer.twitter || ""}
+                          value={organizer.twitter === 'undefined' ? "" : organizer.twitter}
                           onChange={(e) =>
                             setOrganizer((prev) => ({ ...prev, twitter: e.target.value }))
                           }
@@ -445,7 +445,7 @@ const Profile = () => {
                           type="text"
                           name="last-name"
                           id="last-name"
-                          value={organizer.website || ""}
+                          value={organizer.website === 'undefined' ? "" : organizer.website}
                           onChange={(e) =>
                             setOrganizer((prev) => ({ ...prev, website: e.target.value }))
                           }

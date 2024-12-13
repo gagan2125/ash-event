@@ -1,3 +1,4 @@
+import { ProfileFilled, ProfileOutlined } from "@ant-design/icons";
 import {
   ArrowPathIcon,
   CursorArrowRaysIcon,
@@ -5,37 +6,20 @@ import {
   SquaresPlusIcon,
   TicketIcon,
 } from "@heroicons/react/24/outline";
+import { CgProfile } from "react-icons/cg";
 
 const Submenu = [
   {
-    name: "My Bookings",
-    description: "Get a better understanding of your Bookings",
+    name: "My Tickets",
+    //description: "Get a better understanding of your Bookings",
     href: "/my-tickets",
     icon: TicketIcon,
   },
   {
-    name: "Engagement",
-    description: "Speak directly to your customers",
-    href: "#",
-    icon: CursorArrowRaysIcon,
-  },
-  {
-    name: "Security",
-    description: "Your customers’ data will be safe and secure",
-    href: "#",
-    icon: FingerPrintIcon,
-  },
-  {
-    name: "Integrations",
-    description: "Connect with third-party tools",
-    href: "#",
-    icon: SquaresPlusIcon,
-  },
-  {
-    name: "Automations",
-    description: "Build strategic funnels that will convert",
-    href: "#",
-    icon: ArrowPathIcon,
+    name: "My Profile",
+    //description: "Get a better understanding of your Bookings",
+    href: "/my-profile",
+    icon: CgProfile,
   },
 ];
 

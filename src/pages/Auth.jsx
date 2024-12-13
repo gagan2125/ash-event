@@ -34,6 +34,7 @@ const Auth = ({ navigation }) => {
 
   const handleVerify = async () => {
     try {
+      console.log({ numberWithCode, otp }); // Ensure inputs are correct
       const response = await axios.post(`${url}/auth/verify-otp`, { phoneNumber: numberWithCode, otp });
 
       if (response.data.success) {
@@ -42,17 +43,19 @@ const Auth = ({ navigation }) => {
         if (userID && authToken) {
           localStorage.setItem('userID', userID);
           localStorage.setItem('authToken', authToken);
-          if (user.firstName) {
-            localStorage.setItem('userName', user.firstName)
+
+          if (user?.firstName) {
+            localStorage.setItem('userName', user.firstName);
           }
-          if(organizer){
+
+          if (organizer) {
             localStorage.setItem('organizerId', organizer._id);
             localStorage.setItem('accountId', organizer.stripeAccountId);
           }
-          
+
           Modal.success({
             title: 'Successfully Logged in',
-            content: 'continue your browsing events',
+            content: 'Continue your browsing events',
             onOk: () => {
               window.history.back();
             },
@@ -65,20 +68,21 @@ const Auth = ({ navigation }) => {
             maskStyle: { backgroundColor: 'rgba(0, 0, 0, 0.8)' },
             style: { color: 'white', backgroundColor: '#000', borderRadius: '8px', borderColor: '#ccc' },
           });
-
         } else {
-          alert('Error', 'Invalid response data from server.');
+          alert('Error: Invalid response data from server.');
         }
       } else {
-        alert('Error', response.data.message);
+        alert(`Error: ${response.data.message}`);
       }
     } catch (error) {
       console.error('Verification failed:', error);
-      alert('Failed to login');
+      if (error.response) {
+        console.error('Error Response:', error.response.data);
+      }
+
+      alert('Failed to login. Please try again.');
     }
   };
-
-
 
   return (
     <div className="h-screen flex justify-center p-4 py-20">

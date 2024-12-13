@@ -13,11 +13,12 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { IoLogoPlaystation } from "react-icons/io";
+import { IoLogoPlaystation, IoMdLogOut } from "react-icons/io";
 import "../../styles/global.css";
 
 import products from "../../data/Submenu";
 import callsToAction from "../../data/CallToAction";
+import { HiSwitchHorizontal } from "react-icons/hi";
 
 const Navbar = () => {
   const location = useLocation();
@@ -77,7 +78,7 @@ const Navbar = () => {
                   : "text-white hover:border-secondary"
                   }`}
               >
-                About Us
+                Demo Video
               </Link>
               <Link
                 to="/blogs"
@@ -88,17 +89,16 @@ const Navbar = () => {
               >
                 Blogs
               </Link>
-              {userId ? (
-                <Link
-                  to="/my-profile"
-                  className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/my-profile"
-                    ? "border-secondary text-secondary"
-                    : "text-white hover:border-secondary"
-                    }`}
-                >
-                  Profile
-                </Link>
-              ) : (
+              <Link
+                to="/blogs"
+                className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/blogs"
+                  ? "border-secondary text-secondary"
+                  : "text-white hover:border-secondary"
+                  }`}
+              >
+                Contact Us
+              </Link>
+              {!userId && (
                 <Link
                   to="/auth"
                   className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/login"
@@ -109,7 +109,7 @@ const Navbar = () => {
                   Login
                 </Link>
               )}
-              {userId ? (
+              {/* {userId ? (
                 <Link
                   to="/my-tickets"
                   className={`text-base font-semibold leading-6 hover:text-secondary px-3 py-2 border-b-2 border-transparent transition duration-200 ${location.pathname === "/my-tickets"
@@ -119,7 +119,7 @@ const Navbar = () => {
                 >
                   My Bookings
                 </Link>
-              ) : ""}
+              ) : ""} */}
 
               {/* <Popover className="relative">
                 <PopoverButton className="flex items-center gap-x-1 text-base font-semibold leading-6 text-white outline-none hover:text-secondary px-3 py-2 border-b-2 border-transparent hover:border-secondary transition duration-200">
@@ -180,18 +180,96 @@ const Navbar = () => {
               </Popover> */}
             </PopoverGroup>
             {
-              organizerId ? (
+              userId && (
                 <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-                  <div className="rounded-full p-1">
-                    <a
-                      href="/dashboard"
-                      className="inline-block text-base font-semibold leading-6 text-white px-4 py-2 bg-[#080808] rounded-full"
+                  <Popover className="relative">
+                    <PopoverButton className="flex items-center gap-x-1 text-base font-semibold leading-6 text-white outline-none hover:text-secondary px-3 py-2 border-b-2 border-transparent hover:border-secondary transition duration-200">
+                      Profile
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="h-5 w-5 flex-none text-gray-400 hover:text-secondary"
+                      />
+                    </PopoverButton>
+
+                    <PopoverPanel
+                      transition
+                      className="absolute -left-72 top-full z-10 mt-3 w-screen max-w-sm overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 transition data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
                     >
-                      Go to dashboard <span aria-hidden="true">&rarr;</span>
-                    </a>
-                  </div>
+                      <div className="">
+                        {products.map((item) => (
+                          <div
+                            key={item.name}
+                            className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-100"
+                          >
+                            <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                              <item.icon
+                                aria-hidden="true"
+                                className="h-6 w-6 text-gray-600 group-hover:text-secondary"
+                              />
+                            </div>
+                            <div className="flex-auto">
+                              <a
+                                href={item.href}
+                                className="block font-semibold text-gray-900"
+                              >
+                                {item.name}
+                                <span className="absolute inset-0" />
+                              </a>
+                              <p className="mt-1 text-gray-600">
+                                {item.description}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50">
+                        {
+                          organizerId ? (
+                            <>
+                              <a
+                                href='/dashboard'
+                                className="flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-200"
+                              >
+                                <HiSwitchHorizontal
+                                  aria-hidden="true"
+                                  className="h-5 w-5 flex-none text-gray-400"
+                                />
+                                Switch to Organizer
+                              </a>
+                            </>
+                          ) : (
+                            <>
+                              <a
+                                href='/launch-event'
+                                className="flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-200"
+                              >
+                                <HiSwitchHorizontal
+                                  aria-hidden="true"
+                                  className="h-5 w-5 flex-none text-gray-400"
+                                />
+                                Launch Events
+                              </a>
+                            </>
+                          )
+                        }
+                        <a
+                          href='#'
+                          className="flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-200"
+                        >
+                          <IoMdLogOut
+                            aria-hidden="true"
+                            className="h-5 w-5 flex-none text-gray-400"
+                          />
+                          Logout
+                        </a>
+                      </div>
+                    </PopoverPanel>
+                  </Popover>
                 </div>
-              ) : (
+              )
+            }
+            {
+              !userId && !organizerId ? (
                 <div className="hidden lg:flex lg:flex-1 lg:justify-end">
                   <div className="rounded-full p-1">
                     <a
@@ -202,6 +280,8 @@ const Navbar = () => {
                     </a>
                   </div>
                 </div>
+              ) : (
+                <>  </>
               )
             }
           </nav>
