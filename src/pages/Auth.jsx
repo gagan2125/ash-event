@@ -85,14 +85,14 @@ const Auth = ({ navigation }) => {
   };
 
   return (
-    <div className="h-screen flex justify-center p-4 py-20">
-      <div className="w-full max-w-lg p-6 rounded-lg shadow-md">
-        <h2 className="text-3xl font-semibold text-white mb-10">Login / Register</h2>
+    <div className="min-h-screen flex items-start justify-center p-4 bg-primary">
+      <div className="w-full max-w-lg p-6 rounded-lg shadow-md bg-primary">
+        <h2 className="text-3xl font-semibold text-white mb-10 text-start">Login / Register</h2>
 
         <h5 className="text-white mb-2">Mobile Number</h5>
-        <div className="flex items-center space-x-3 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-4">
           <select
-            className="form-select bg-primary text-gray-200 border-b border-gray-300 p-2 outline-none"
+            className="form-select bg-primary text-gray-200 border-b border-gray-700 p-2 outline-none sm:w-auto w-full"
             value={selectedCountryCode}
             onChange={(e) => setSelectedCountryCode(e.target.value)}
           >
@@ -104,19 +104,19 @@ const Auth = ({ navigation }) => {
           <input
             type="text"
             placeholder="eg. 9876543210"
-            className="form-input flex-1 bg-primary text-white border-b-2 border-gray-300 p-2 outline-none focus:ring-0"
+            className="form-input flex-1 bg-primary text-white border-b-2 border-gray-700 p-2 outline-none focus:ring-0 mt-2 sm:mt-0"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
           />
           <button
             onClick={handleSendOtp}
-            className="bg-[#080808] text-white px-4 py-2 rounded-md hover:bg-[#0c0c0c] transition"
+            className="bg-[#080808] text-white px-4 py-2 rounded-md hover:bg-[#0c0c0c] transition mt-2 sm:mt-0"
           >
             OTP
           </button>
         </div>
-        <p className="text-gray-500">
-          By continuing, you agree to use Terms of Service and Privacy Policy
+        <p className="text-gray-500 text-sm text-center">
+          By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
 
         {otpSent && (
@@ -125,18 +125,22 @@ const Auth = ({ navigation }) => {
               <input
                 type="text"
                 placeholder="Enter OTP"
-                className="form-input w-full bg-primary text-white border-b-2 border-gray-300 p-2 outline-none focus:ring-0"
+                className="form-input w-full bg-primary text-white border-b-2 border-gray-700 p-2 outline-none focus:ring-0"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
               />
             </div>
-            <button className="w-full bg-white text-primary py-2 px-4 rounded-lg font-bold hover:bg-gray-200 transition" onClick={handleVerify}>
+            <button
+              className="w-full bg-white text-primary py-2 px-4 rounded-lg font-bold hover:bg-gray-200 transition"
+              onClick={handleVerify}
+            >
               Login / Register
             </button>
           </>
         )}
       </div>
     </div>
+
   );
 };
 

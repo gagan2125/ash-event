@@ -11,8 +11,38 @@ import Sidebar, { SidebarItem } from "../layouts/Sidebar";
 import { useLocation } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { FaPeopleGroup } from "react-icons/fa6";
+import { Modal } from "antd";
+
 const SidebarComponent = () => {
   const location = useLocation();
+  const handleLogoutClick = () => {
+    Modal.confirm({
+      title: "Logout Alert",
+      content: "Are you sure you want to logout?",
+      onOk: () => {
+        localStorage.clear();
+        window.location.href = "/";
+      },
+      onCancel: () => {
+        console.log("Logout canceled");
+      },
+      okButtonProps: {
+        style: { backgroundColor: "black", borderColor: "black", color: "white" },
+      },
+      cancelButtonProps: {
+        style: { backgroundColor: "gray", borderColor: "gray", color: "white" },
+      },
+      okText: "Logout",
+      cancelText: "Cancel",
+      maskStyle: { backgroundColor: "rgba(0, 0, 0, 0.8)" },
+      style: {
+        color: "white",
+        backgroundColor: "#000",
+        borderRadius: "8px",
+        borderColor: "#ccc",
+      },
+    });
+  };
   return (
     <div>
       <Sidebar>
@@ -61,7 +91,11 @@ const SidebarComponent = () => {
           link="/profile"
           active={location.pathname === "/profile"}
         />
-        <SidebarItem icon={<LogOutIcon size={20} />} text="Logout" link="/" />
+        <SidebarItem
+          icon={<LogOutIcon size={20} />}
+          text="Logout"
+          onClick={handleLogoutClick}
+        />
       </Sidebar>
     </div>
   );

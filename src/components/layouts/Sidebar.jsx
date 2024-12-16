@@ -20,7 +20,7 @@ export default function Sidebar({ children }) {
       } catch (error) {
         console.error("Error fetching organizer:", error);
       }
-    }else{
+    } else {
       console.log("not found")
     }
   };
@@ -95,14 +95,20 @@ export default function Sidebar({ children }) {
   );
 }
 
-export function SidebarItem({ icon, text, active, alert, link }) {
+export function SidebarItem({ icon, text, active, alert, link, onClick }) {
   const { expanded } = useContext(SidebarContext);
+  const handleClick = (e) => {
+    if (onClick) {
+      e.preventDefault();
+      onClick();
+    }
+  };
   return (
-    <a href={link}>
+    <a href={link || "#"} onClick={handleClick}>
       <li
         className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${active
-          ? "text-gray-50"
-          : "hover:bg-[#3f3f3f61] hover:text-gray-50 text-gray-600"
+            ? "text-gray-50"
+            : "hover:bg-[#3f3f3f61] hover:text-gray-50 text-gray-600"
           }`}
       >
         {icon}

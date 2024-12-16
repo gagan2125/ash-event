@@ -132,7 +132,7 @@ const EventList = () => {
   };
 
   const formatDisplayValue = (value) => {
-    const formattedValue = value.map((val) => (val === 0 ? "Free" : val === 100 ? "All" : val));
+    const formattedValue = value.map((val) => (val === 0 ? "Free" : val === 100 ? "$ All" : `$ ${val}`));
     return `${formattedValue[0]} - ${formattedValue[1]}`;
   };
 
@@ -176,7 +176,7 @@ const EventList = () => {
                 onChange={handleSliderChange}
                 className="text-black"
                 tooltip={{
-                  formatter: (val) => (val === 0 ? "Free" : val === 100 ? "All" : val),
+                  formatter: (val) => (val === 0 ? "Free" : val === 100 ? "$ All" : `$ ${val}`),
                 }}
               />
             </div>

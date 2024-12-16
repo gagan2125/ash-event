@@ -12,6 +12,8 @@ import { LuDoorOpen } from "react-icons/lu";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import url from "../../../constants/url";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SingleInfo = () => {
   const { name } = useParams()
@@ -22,6 +24,7 @@ const SingleInfo = () => {
   const [selectedTicketPrice, setSelectedTicketPrice] = useState(0);
   const [selectedTicketId, setSelectedTicketId] = useState("");
   const [selectedTicketName, setSelectedTicketName] = useState("");
+  const [selectedMaxTicket, setSelectedMaxTicket] = useState(0);
   const navigate = useNavigate();
   const [userId, setUserId] = useState(null);
   const location = useLocation();
@@ -79,7 +82,19 @@ const SingleInfo = () => {
     setActiveTab(tabName);
   };
 
-  const increment = () => setCount((prev) => prev + 1);
+  const increment = () => {
+    setCount((prev) => {
+      if (prev < selectedMaxTicket) {
+        return prev + 1;
+      }
+      toast.error("You have reached the maximum ticket purchase count", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      return prev;
+    });
+  };
+
   const decrement = () => setCount((prev) => (prev > 1 ? prev - 1 : 1));
   const togglePopup = () => setShowPopup(!showPopup);
 
@@ -142,7 +157,7 @@ const SingleInfo = () => {
 
                   <div class="flex flex-col">
                     <h3 class="text-xl font-semibold">{event?.organizer_id?.name}</h3>
-                    <a href="profile_link_here" class="text-sm text-gray-400 hover:underline">Visit Profile</a>
+                    <a href={`https://ash-event.vercel.app/profile-url/${event?.organizer_id?._id}/${event?.organizer_id?.url}`} class="text-sm text-gray-400 hover:underline">Visit Profile</a>
                   </div>
                 </div>
                 <div class="flex space-x-4">
@@ -308,7 +323,13 @@ const SingleInfo = () => {
                         <div
                           key={index}
                           className="p-4 bg-gray-100 rounded-lg shadow hover:shadow-lg hover:border hover:border-black transition cursor-pointer"
-                          onClick={() => { setSelectedTicketName(ticket.ticket_name); setSelectedTicketId(ticket._id); setSelectedTicketPrice(ticket.price); handleTabSwitch("Checkout") }}
+                          onClick={() => {
+                            setSelectedTicketName(ticket.ticket_name);
+                            setSelectedTicketId(ticket._id);
+                            setSelectedTicketPrice(ticket.price);
+                            setSelectedMaxTicket(ticket.max_count)
+                            handleTabSwitch("Checkout")
+                          }}
                         >
                           <div className="flex justify-between items-center">
                             <h3 className="text-md font-medium text-gray-600">{ticket.ticket_name}</h3>
@@ -381,6 +402,7 @@ const SingleInfo = () => {
           )}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

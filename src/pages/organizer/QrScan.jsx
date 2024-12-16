@@ -7,6 +7,9 @@ const QrScan = () => {
     const [data, setData] = useState(null);
     const [isScanning, setIsScanning] = useState(true);
     const [error, setError] = useState(null);
+    const [facingMode, setFacingMode] = useState(
+        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? "environment" : "user"
+    );
 
     const handleScan = async (result) => {
         if (result) {
@@ -84,6 +87,9 @@ const QrScan = () => {
                                 onError={handleError}
                                 onScan={handleScan}
                                 style={{ width: "100%" }}
+                                constraints={{
+                                    video: { facingMode: facingMode },
+                                }}
                             />
                         </div>
                         <div className="flex justify-between px-4">

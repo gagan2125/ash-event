@@ -742,9 +742,15 @@ const CreateUserEvent = () => {
                             type="number"
                             className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
                             value={minLimit}
-                            onChange={(e) => setMinLimit(e.target.value)}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value, 10); // Convert the input value to a number
+                              if (value >= 1 || e.target.value === "") { // Allow only numbers >= 1 or empty input
+                                setMinLimit(e.target.value);
+                              }
+                            }}
                           />
                         </div>
+
                         <div>
                           <label className="text-gray-400">Maximum</label>
                           <input

@@ -15,6 +15,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { IoLogoPlaystation, IoMdLogOut } from "react-icons/io";
 import "../../styles/global.css";
+import { Button, Modal, Space } from 'antd';
 
 import products from "../../data/Submenu";
 import callsToAction from "../../data/CallToAction";
@@ -34,7 +35,29 @@ const Navbar = () => {
     setOrganizerId(storedOragnizerId)
   }, []);
 
-  console.log(organizerId)
+  const handleLogout = () => {
+    Modal.confirm({
+      title: 'Logout Alert',
+      content: 'Are you sure you want to logout?',
+      onOk: () => {
+        localStorage.clear();
+        window.location.href = '/';
+      },
+      onCancel: () => {
+        console.log('Logout canceled');
+      },
+      okButtonProps: {
+        style: { backgroundColor: 'black', borderColor: 'black', color: 'white' },
+      },
+      cancelButtonProps: {
+        style: { backgroundColor: 'gray', borderColor: 'gray', color: 'white' },
+      },
+      okText: 'Logout',
+      cancelText: 'Cancel',
+      maskStyle: { backgroundColor: 'rgba(0, 0, 0, 0.8)' },
+      style: { color: 'white', backgroundColor: '#000', borderRadius: '8px', borderColor: '#ccc' },
+    });
+  };
 
   return (
     <>
@@ -252,8 +275,8 @@ const Navbar = () => {
                             </>
                           )
                         }
-                        <a
-                          href='#'
+                        <button
+                          onClick={handleLogout}
                           className="flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-200"
                         >
                           <IoMdLogOut
@@ -261,7 +284,7 @@ const Navbar = () => {
                             className="h-5 w-5 flex-none text-gray-400"
                           />
                           Logout
-                        </a>
+                        </button>
                       </div>
                     </PopoverPanel>
                   </Popover>
