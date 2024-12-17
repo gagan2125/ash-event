@@ -112,7 +112,7 @@ const Auth = ({ navigation }) => {
             onClick={handleSendOtp}
             className="bg-[#080808] text-white px-4 py-2 rounded-md hover:bg-[#0c0c0c] transition mt-2 sm:mt-0"
           >
-            OTP
+            continue
           </button>
         </div>
         <p className="text-gray-500 text-sm text-justify">
