@@ -115,8 +115,11 @@ const Auth = ({ navigation }) => {
             OTP
           </button>
         </div>
-        <p className="text-gray-500 text-sm text-center">
-          By continuing, you agree to our Terms of Service and Privacy Policy
+        <p className="text-gray-500 text-sm text-justify">
+          By continuing, you agree to our Terms of Service and Privacy Policy.
+          We’ll text you a code to verify your account (usual rates may apply). 
+          We’ll also text you if you opt into text updates about events (frequency varies). 
+          To opt out of texts, reply STOP to any of them.
         </p>
 
         {otpSent && (
