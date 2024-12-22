@@ -17,7 +17,7 @@ const SelectionEvent = () => {
         </div>
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8">
           <a
-            href="/create-rsvp"
+            href={`/create-event-user/${"rsvp"}`}
             className="bg-primary border-2 border-secondary bg-opacity-90 p-6 sm:p-10 rounded-lg shadow-lg transform transition-transform duration-200 hover:scale-105 cursor-pointer flex flex-col items-center space-y-4 w-full sm:w-64 md:w-80 shiny-border"
           >
             <img
@@ -28,7 +28,7 @@ const SelectionEvent = () => {
             <h2 className="text-xl sm:text-2xl font-semibold">RSVP only</h2>
           </a>
           <a
-            href="/create-event-user"
+            href={`/create-event-user/${"ticket"}`}
             className="bg-primary border-2 border-secondary bg-opacity-90 p-6 sm:p-10 rounded-lg shadow-lg transform transition-transform duration-200 hover:scale-105 cursor-pointer flex flex-col items-center space-y-4 w-full sm:w-64 md:w-80 shiny-border"
           >
             <img

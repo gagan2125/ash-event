@@ -7,8 +7,10 @@ import url from "../constants/url"
 import { AndroidOutlined, AppleOutlined, BankOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { Loader } from 'rsuite';
+import { useParams } from "react-router-dom";
 
 const CreateUserEvent = () => {
+  const { type } = useParams()
   const [selectedImage, setSelectedImage] = useState(null);
   const [eventDescription, setEventDescription] = useState("");
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -306,6 +308,7 @@ const CreateUserEvent = () => {
     const formData = new FormData();
     formData.append('organizer_id', oragnizerId);
     formData.append('event_name', name);
+    formData.append('event_type', type);
     formData.append('start_date', startDate);
     formData.append('end_date', endDate);
     formData.append('open_time', openTime);
@@ -453,19 +456,23 @@ const CreateUserEvent = () => {
                     onChange={(e) => setOpenTime(e.target.value)}
                   />
                 </div>
-                <div className="flex-1">
-                  <label className="text-gray-400 mb-1 block">Starting Pirce ($)</label>
-                  <input
-                    type="number"
-                    className="p-3 w-full bg-[#000] text-white rounded-md focus:outline-none border border-[#5d5d5d] focus:border-gray-400 shadow-lg shadow-[#3f3f3f] focus:shadow-md"
-                    placeholder="Starting Price"
-                    style={{
-                      colorScheme: "dark",
-                    }}
-                    value={startPrice}
-                    onChange={(e) => setStartPrice(e.target.value)}
-                  />
-                </div>
+                {
+                  type !== 'rsvp' && (
+                    <div className="flex-1">
+                      <label className="text-gray-400 mb-1 block">Starting Pirce ($)</label>
+                      <input
+                        type="number"
+                        className="p-3 w-full bg-[#000] text-white rounded-md focus:outline-none border border-[#5d5d5d] focus:border-gray-400 shadow-lg shadow-[#3f3f3f] focus:shadow-md"
+                        placeholder="Starting Price"
+                        style={{
+                          colorScheme: "dark",
+                        }}
+                        value={startPrice}
+                        onChange={(e) => setStartPrice(e.target.value)}
+                      />
+                    </div>
+                  )
+                }
               </div>
               <div>
                 <input
@@ -598,7 +605,6 @@ const CreateUserEvent = () => {
                 </div>
               )}
             </div>
-
           </div>
 
           {isSidebarVisible && (
@@ -637,16 +643,22 @@ const CreateUserEvent = () => {
                     onChange={(e) => setQuantity(e.target.value)}
                   />
                 </div>
-                <div className="w-1/2">
-                  <label className="text-gray-400">Price</label>
-                  <input
-                    type="text"
-                    className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
-                    placeholder="Enter ticket price"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                  />
-                </div>
+                {
+                  type !== 'rsvp' && (
+                    <>
+                      <div className="w-1/2">
+                        <label className="text-gray-400">Price</label>
+                        <input
+                          type="text"
+                          className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
+                          placeholder="Enter ticket price"
+                          value={price}
+                          onChange={(e) => setPrice(e.target.value)}
+                        />
+                      </div>
+                    </>
+                  )
+                }
               </div>
               <div className="mb-4 mt-10">
                 <div className="flex items-center justify-between">
@@ -819,16 +831,22 @@ const CreateUserEvent = () => {
                     onChange={(e) => setSelectedTicket((prev) => ({ ...prev, quantity: e.target.value }))}
                   />
                 </div>
-                <div className="w-1/2">
-                  <label className="text-gray-400">Price</label>
-                  <input
-                    type="text"
-                    className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
-                    placeholder="Enter ticket price"
-                    value={selectedTicket.price || ""}
-                    onChange={(e) => setSelectedTicket((prev) => ({ ...prev, price: e.target.value }))}
-                  />
-                </div>
+                {
+                  type !== 'rsvp' && (
+                    <>
+                      <div className="w-1/2">
+                        <label className="text-gray-400">Price</label>
+                        <input
+                          type="text"
+                          className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
+                          placeholder="Enter ticket price"
+                          value={selectedTicket.price || ""}
+                          onChange={(e) => setSelectedTicket((prev) => ({ ...prev, price: e.target.value }))}
+                        />
+                      </div>
+                    </>
+                  )
+                }
               </div>
               <div className="mb-4 mt-10">
                 <div className="flex items-center justify-between">

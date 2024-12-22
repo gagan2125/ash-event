@@ -11,11 +11,11 @@ import { TfiAnnouncement } from "react-icons/tfi";
 import { LuDoorOpen } from "react-icons/lu";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
-import url from "../../../constants/url";
+import url from "../../constants/url";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const SingleInfo = () => {
+const EventCopy = () => {
   const { name } = useParams()
   const [showPopup, setShowPopup] = useState(false);
   const [count, setCount] = useState(1);
@@ -29,7 +29,7 @@ const SingleInfo = () => {
   const [userId, setUserId] = useState(null);
   const location = useLocation();
 
-  const { id } = location.state || {};
+  const { id } = useParams();
   const [hasVisited, setHasVisited] = useState(false);
 
   const handleCheckout = () => {
@@ -62,7 +62,7 @@ const SingleInfo = () => {
     };
 
     storeVisitData();
-  }, [id]);
+  }, [id]); 
 
 
   const cards = [
@@ -155,17 +155,6 @@ const SingleInfo = () => {
     navigate('/auth');
   }
 
-  const handleCopyLink = () => {
-    const url = `https://avenue.tickets/event-copy/${event._id}`;
-    navigator.clipboard.writeText(url)
-      .then(() => {
-        alert("Event Link copied to clipboard!");
-      })
-      .catch((err) => {
-        console.error("Failed to copy the link: ", err);
-      });
-  };
-
   return (
     <div className="flex justify-start sm:px-72 items-start min-h-screen bg-black -mt-20">
       <div
@@ -211,7 +200,7 @@ const SingleInfo = () => {
                 Fast Filling
               </p> */}
               <h1 className="mt-8 text-pretty text-4xl font-semibold tracking-tight text-gray-100 sm:text-5xl">
-                <span onClick={handleCopyLink} className="cursor-pointer hover:underline">{event.event_name}</span>
+                {event.event_name}
               </h1>
               <p className="text-sm leading-8 text-yellow-300">
                 {formatDate(event.start_date)} - {formatDate(event.end_date)}
@@ -317,21 +306,6 @@ const SingleInfo = () => {
               </div>
               <hr className="my-12 border-t border-[#3f3f3f] w-5/5" />
             </div>
-            {
-              event.show === 'YES' && (
-                <div className="mt-0">
-                  <h3 className="text-xl font-medium leading-7 text-white mb-2">
-                    Guest Lists
-                  </h3>
-                  <div className="flex flex-wrap justify-between gap-2 mt-2">
-                    <div className="flex flex-col items-center justify-center w-20 h-20 bg-gray-800 text-white rounded-full">
-                      <span className="text-lg font-medium">Card 1</span>
-                    </div>
-                  </div>
-                  <hr className="my-12 border-t border-[#3f3f3f] w-5/5" />
-                </div>
-              )
-            }
           </div>
 
           <div className="flex justify-center lg:justify-center lg:sticky lg:top-4 flex-col items-center lg:items-center">
@@ -475,4 +449,4 @@ const SingleInfo = () => {
   );
 };
 
-export default SingleInfo;
+export default EventCopy;

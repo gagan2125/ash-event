@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import QrScanner from "react-qr-scanner";
 import axios from "axios";
 import url from "../../constants/url";
+import { useParams } from "react-router-dom";
 
-const QrScan = () => {
+const MemberQRScanner = () => {
+    const { id } = useParams()
     const [data, setData] = useState(null);
     const [isScanning, setIsScanning] = useState(true);
     const [error, setError] = useState(null);
@@ -26,6 +28,7 @@ const QrScan = () => {
                 });
 
                 const fetchedData = await response.json();
+                console.log(fetchedData)
                 if (response.ok) {
                     setData(fetchedData);
                 } else {
@@ -52,7 +55,8 @@ const QrScan = () => {
         if (data?.payment?._id) {
             try {
                 const response = await axios.post(`${url}/updateQRCodeStatus`, {
-                    id: data.payment._id,
+                    id: data?.payment?._id,
+                    member_id: id
                 });
 
                 if (response.status === 200) {
@@ -93,15 +97,16 @@ const QrScan = () => {
                             />
                         </div>
                         <div className="flex justify-between px-4">
-                            <a href="/org-event" className="mt-4 text-white text-sm rounded transition hover:underline">
+                            <a href={`/home-member/${id}`} className="mt-4 text-white text-sm rounded transition hover:underline">
                                 Back
                             </a>
-                            <button
-                                onClick={handleClose}
+                            <a
+                                //onClick={handleClose}
+                                href={`/scanned-tickets/${id}`}
                                 className="mt-4 text-white text-sm rounded transition hover:underline"
                             >
-                                Close Scanner
-                            </button>
+                                Scanned Tickets
+                            </a>
                             <button
                                 onClick={() => window.location.reload()}
                                 className="mt-4 text-white text-sm rounded transition hover:underline"
@@ -117,60 +122,67 @@ const QrScan = () => {
                 <div className="mt-10 text-white px-4">
                     {error && <p className="text-red-500">{error}</p>}
                     {data ? (
-                        data.error ? (
-                            <p>{data.error}</p>
+                        data.event && data.event.members.includes(id) ? (
+                            data.error ? (
+                                <p>{data.error}</p>
+                            ) : (
+                                <table className="table-auto w-full text-left border-collapse">
+                                    <tbody>
+                                        {data.payment && (
+                                            <>
+                                                <tr>
+                                                    <td className="border-b border-gray-800 px-4 py-2 font-medium">Tickets</td>
+                                                    <td className="border-b border-gray-800 px-4 py-2">{data.payment.count || "N/A"}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="border-b border-gray-800 px-4 py-2 font-medium">Amount</td>
+                                                    <td className="border-b border-gray-800 px-4 py-2">${(data.payment.amount / 100).toFixed(2) || "N/A"}</td>
+                                                </tr>
+                                            </>
+                                        )}
+                                        {data.event && (
+                                            <tr>
+                                                <td className="border-b border-gray-800 px-4 py-2 font-medium">Event Name</td>
+                                                <td className="border-b border-gray-800 px-4 py-2">{data.event.event_name || "N/A"}</td>
+                                            </tr>
+                                        )}
+                                        {data.user && (
+                                            <>
+                                                <tr>
+                                                    <td className="border-b border-gray-800 px-4 py-2 font-medium">Name</td>
+                                                    <td className="border-b border-gray-800 px-4 py-2">{data.user.firstName || "N/A"} {data.user.lastName || "N/A"}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td className="border-b border-gray-800 px-4 py-2 font-medium">Phone Number</td>
+                                                    <td className="border-b border-gray-800 px-4 py-2">{data.user.phoneNumber || "N/A"}</td>
+                                                </tr>
+                                            </>
+                                        )}
+                                    </tbody>
+                                </table>
+                            )
                         ) : (
-                            <table className="table-auto w-full text-left border-collapse">
-                                <tbody>
-                                    {data.payment && (
-                                        <>
-                                            <tr>
-                                                <td className="border-b border-gray-800 px-4 py-2 font-medium">Tickets</td>
-                                                <td className="border-b border-gray-800 px-4 py-2">{data.payment.count || "N/A"}</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="border-b border-gray-800 px-4 py-2 font-medium">Amount</td>
-                                                <td className="border-b border-gray-800 px-4 py-2">${(data.payment.amount / 100).toFixed(2) || "N/A"}</td>
-                                            </tr>
-                                        </>
-                                    )}
-                                    {data.event && (
-                                        <tr>
-                                            <td className="border-b border-gray-800 px-4 py-2 font-medium">Event Name</td>
-                                            <td className="border-b border-gray-800 px-4 py-2">{data.event.event_name || "N/A"}</td>
-                                        </tr>
-                                    )}
-                                    {data.user && (
-                                        <>
-                                            <tr>
-                                                <td className="border-b border-gray-800 px-4 py-2 font-medium">Name</td>
-                                                <td className="border-b border-gray-800 px-4 py-2">{data.user.firstName || "N/A"} {data.user.lastName || "N/A"}</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="border-b border-gray-800 px-4 py-2 font-medium">Phone Number</td>
-                                                <td className="border-b border-gray-800 px-4 py-2">{data.user.phoneNumber || "N/A"}</td>
-                                            </tr>
-                                        </>
-                                    )}
-                                </tbody>
-                            </table>
+                            <p>You are not authorized for this.</p>
                         )
                     ) : (
                         <p>No QR scanned yet.</p>
                     )}
                 </div>
 
-                {data?.payment?.qr_status === 'false' && data && (
+
+                {data?.payment?.qr_status === 'false' && data ? (
                     <button
                         onClick={handleSave}
                         className="mt-4 bg-gray-100 text-black py-1 px-2 rounded hover:bg-gray-300"
                     >
                         Done
                     </button>
-                )}
+                ) : data ? (
+                    <p className="mt-5 text-green-600">Already Checked In.</p>
+                ) : ""}
             </div>
         </div>
     );
 };
 
-export default QrScan;
+export default MemberQRScanner;

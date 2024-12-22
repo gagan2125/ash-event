@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FaEdit, FaTimes, FaTrash } from "react-icons/fa";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -7,6 +7,7 @@ import url from "../../constants/url"
 import { useParams } from "react-router-dom";
 import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
+import { X, ChevronDown } from 'lucide-react';
 
 const Edit = () => {
     const { id } = useParams()
@@ -48,10 +49,20 @@ const Edit = () => {
     const [maxLimit, setMaxLimit] = useState("")
     const [ticketDescription, setTicketDescription] = useState("");
     const [isExplore, setIsExplore] = useState(true);
+    const [isShow, setIsShow] = useState(false);
     const [file, setFile] = useState(null);
     const [accountId, setAccountId] = useState("");
 
     const [isUpdateLoading, setIsUpdateLoading] = useState(false)
+    const [tags, setTags] = useState([]);
+    const [input, setInput] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const wrapperRef = useRef(null);
+    const inputWrapperRef = useRef(null);
+    const [members, setMembers] = useState([]);
+
+    const suggestions = members.map(member => member.name);
+    const [filteredSuggestions, setFilteredSuggestions] = useState(suggestions);
 
     const items = [
         ...(accountId
@@ -67,6 +78,14 @@ const Edit = () => {
             key: 'draft',
         },
     ];
+
+    useEffect(() => {
+        if (event?.show === 'YES') {
+            setIsShow(true);
+        } else {
+            setIsShow(false);
+        }
+    }, [event]);
 
     useEffect(() => {
         const loadFromLocalStorage = () => {
@@ -193,7 +212,7 @@ const Edit = () => {
     const formattedTickets = tickets.map((ticket) => ({
         ticket_name: ticket.ticketName || ticket.ticket_name,
         qty: ticket.quantity || ticket.qty,
-        price: ticket.price,
+        price: ticket.price || 0,
         sale_start: ticket.startSale || ticket.sale_start,
         sale_end: ticket.endSale || ticket.sale_end,
         valid_start: ticket.startValid || ticket.valid_start,
@@ -224,6 +243,7 @@ const Edit = () => {
         const formData = new FormData();
         formData.append('organizer_id', oragnizerId);
         formData.append('event_name', name || event.event_name);
+        formData.append('event_type', event.event_type);
         formData.append('start_date', startDate || event.start_date);
         formData.append('end_date', endDate || event.end_date);
         formData.append('open_time', openTime || event.open_time);
@@ -245,12 +265,15 @@ const Edit = () => {
         formData.append('font', "" || event.font);
         formData.append('color', "" || event.color);
         formData.append('explore', isExplore ? "YES" : "NO");
+        formData.append('show', isShow ? "YES" : "NO");
         formattedTickets.forEach((ticket, index) => {
             for (const key in ticket) {
                 formData.append(`tickets[${index}][${key}]`, ticket[key]);
             }
         });
-
+        tags.forEach((tag, index) => {
+            formData.append(`members[${index}]`, tag.id);
+        });
         try {
             setIsUpdateLoading(true)
             const response = await axios.put(`${url}/event/update-event/${id}`, formData, {
@@ -275,9 +298,17 @@ const Edit = () => {
     const fetchEvent = async () => {
         try {
             const response = await axios.get(`${url}/event/get-event-by-id/${id}`);
+            const eventData = response.data;
             setEvent(response.data);
             setTickets(response.data.tickets)
             setSelectedImage(response.data.flyer)
+            if (eventData.members) {
+                const prePopulatedTags = eventData.members.map(member => ({
+                    name: member.name,
+                    id: member._id,
+                }));
+                setTags(prePopulatedTags);
+            }
         } catch (error) {
             console.error('Error fetching events:', error);
         }
@@ -294,6 +325,80 @@ const Edit = () => {
             handleUpdateEvent(false);
         }
     };
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        const newSuggestions = members.map(member => member.name);
+        setFilteredSuggestions(newSuggestions);
+    }, [members]);
+
+    const handleInputChange = (e) => {
+        const userInput = e.target.value;
+        setInput(userInput);
+
+        const filtered = suggestions.filter(
+            suggestion => suggestion.toLowerCase().includes(userInput.toLowerCase())
+        );
+        setFilteredSuggestions(filtered);
+        setShowSuggestions(true);
+    };
+
+    const addTag = (tag) => {
+        const memberData = members.find(member => member.name === tag);
+        if (memberData && !tags.some(t => t.name === tag)) {
+            setTags([...tags, {
+                name: tag,
+                id: memberData._id
+            }]);
+        }
+        setInput('');
+        setFilteredSuggestions(suggestions);
+    };
+
+    const removeTag = (tagName) => {
+        setTags(tags.filter(tag => tag.name !== tagName));
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && input) {
+            e.preventDefault();
+            const matchedSuggestion = suggestions.find(
+                suggestion => suggestion.toLowerCase() === input.toLowerCase()
+            );
+            if (matchedSuggestion) {
+                addTag(matchedSuggestion);
+            }
+        } else if (e.key === 'Backspace' && !input && tags.length > 0) {
+            removeTag(tags[tags.length - 1].name);
+        }
+    };
+
+    const toggleSuggestions = () => {
+        setShowSuggestions(!showSuggestions);
+    };
+
+    const fetchMembers = async () => {
+        try {
+            const response = await axios.get(`${url}/member/get-organizer-member/${oragnizerId}`);
+            setMembers(response.data);
+        } catch (error) {
+            console.error('Error fetching members:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchMembers();
+    }, [oragnizerId]);
 
     return (
         <div className="min-h-screen bg-black text-white">
@@ -412,19 +517,23 @@ const Edit = () => {
                                         onChange={(e) => setOpenTime(e.target.value)}
                                     />
                                 </div>
-                                <div className="flex-1">
-                                    <label className="text-gray-400 mb-1 block">Starting Pirce ($)</label>
-                                    <input
-                                        type="number"
-                                        className="p-3 w-full bg-[#000] text-white rounded-md focus:outline-none border border-[#5d5d5d] focus:border-gray-400 shadow-lg shadow-[#3f3f3f] focus:shadow-md"
-                                        placeholder="Starting Price"
-                                        style={{
-                                            colorScheme: "dark",
-                                        }}
-                                        value={startPrice || event.ticket_start_price}
-                                        onChange={(e) => setStartPrice(e.target.value)}
-                                    />
-                                </div>
+                                {
+                                    event.event_type !== 'rsvp' && (
+                                        <div className="flex-1">
+                                            <label className="text-gray-400 mb-1 block">Starting Pirce ($)</label>
+                                            <input
+                                                type="number"
+                                                className="p-3 w-full bg-[#000] text-white rounded-md focus:outline-none border border-[#5d5d5d] focus:border-gray-400 shadow-lg shadow-[#3f3f3f] focus:shadow-md"
+                                                placeholder="Starting Price"
+                                                style={{
+                                                    colorScheme: "dark",
+                                                }}
+                                                value={startPrice || event.ticket_start_price}
+                                                onChange={(e) => setStartPrice(e.target.value)}
+                                            />
+                                        </div>
+                                    )
+                                }
                             </div>
                             <div>
                                 <input
@@ -444,14 +553,27 @@ const Edit = () => {
                                     onChange={(e) => setAddress(e.target.value)}
                                 />
                             </div>
-                            <div className="flex items-center space-x-4 mt-10">
-                                <h1 className="text-white">Show Event on Explore</h1>
+                            {/* <div className="flex items-center space-x-4 mt-10">
+                                <h1 className="text-white">Show Attendes on Page</h1>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
                                         className="sr-only peer"
                                         checked={isExplore || event.explore}
                                         onChange={(e) => setIsExplore(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 peer-focus:ring-2 peer-focus:ring-green-300"></div>
+                                    <div className="absolute inset-y-0 left-1 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
+                                </label>
+                            </div> */}
+                            <div className="flex items-center space-x-4 mt-10">
+                                <h1 className="text-white">Show Attendes on Page</h1>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={isShow}
+                                        onChange={(e) => setIsShow(e.target.checked)}
                                     />
                                     <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 peer-focus:ring-2 peer-focus:ring-green-300"></div>
                                     <div className="absolute inset-y-0 left-1 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div>
@@ -465,6 +587,65 @@ const Edit = () => {
                                     value={category || event.category}
                                     onChange={(e) => setCategory(e.target.value)}
                                 />
+                            </div>
+                            <div className="w-full" ref={wrapperRef}>
+                                <div className="border rounded-lg p-2 bg-black">
+                                    <div className="flex flex-wrap gap-2">
+                                        {tags.map((tag, index) => (
+                                            <span
+                                                key={index}
+                                                className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm"
+                                            >
+                                                {tag.name}
+                                                <button
+                                                    onClick={() => removeTag(tag.name)}
+                                                    className="hover:text-blue-600 focus:outline-none"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </span>
+                                        ))}
+                                        <div ref={inputWrapperRef} className="relative flex-1">
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="text"
+                                                    value={input}
+                                                    onChange={handleInputChange}
+                                                    onKeyDown={handleKeyDown}
+                                                    onFocus={() => setShowSuggestions(true)}
+                                                    className="w-full min-w-[120px] outline-none bg-black"
+                                                    placeholder={tags.length === 0 ? "Add members..." : ""}
+                                                />
+                                                <button
+                                                    onClick={toggleSuggestions}
+                                                    className="p-1 hover:bg-gray-700 rounded"
+                                                >
+                                                    <ChevronDown
+                                                        size={20}
+                                                        className={`transform transition-transform ${showSuggestions ? 'rotate-180' : ''}`}
+                                                    />
+                                                </button>
+                                            </div>
+                                            {showSuggestions && (
+                                                <div className="absolute left-0 right-0 mt-1 bg-black border rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
+                                                    {filteredSuggestions.length > 0 ? (
+                                                        filteredSuggestions.map((suggestion, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="px-3 py-2 hover:bg-gray-700 cursor-pointer"
+                                                                onClick={() => addTag(suggestion)}
+                                                            >
+                                                                {suggestion}
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="px-3 py-2 text-gray-500">No members found</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div className="pb-4">
                                 <ReactQuill
@@ -532,7 +713,9 @@ const Edit = () => {
                                     >
                                         <div className="flex-1">
                                             <h3 className="text-xl font-semibold">{ticket.ticketName || ticket.ticket_name}</h3>
-                                            <p className="text-lg mt-3">${ticket.price}</p>
+                                            {event.event_type !== 'rsvp' && (
+                                                <p className="text-lg mt-3">${ticket.price}</p>
+                                            )}
                                             <p className="text-sm mt-1" dangerouslySetInnerHTML={{ __html: ticket.ticketDescription || ticket.ticket_description }}></p>
                                         </div>
                                         <div className="ml-4 flex space-x-2">
@@ -595,16 +778,20 @@ const Edit = () => {
                                         onChange={(e) => setQuantity(e.target.value)}
                                     />
                                 </div>
-                                <div className="w-1/2">
-                                    <label className="text-gray-400">Price</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
-                                        placeholder="Enter ticket price"
-                                        value={price}
-                                        onChange={(e) => setPrice(e.target.value)}
-                                    />
-                                </div>
+                                {
+                                    event.event_type !== 'rsvp' && (
+                                        <div className="w-1/2">
+                                            <label className="text-gray-400">Price</label>
+                                            <input
+                                                type="text"
+                                                className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
+                                                placeholder="Enter ticket price"
+                                                value={price}
+                                                onChange={(e) => setPrice(e.target.value)}
+                                            />
+                                        </div>
+                                    )
+                                }
                             </div>
                             <div className="mb-4 mt-10">
                                 <div className="flex items-center justify-between">
@@ -771,16 +958,22 @@ const Edit = () => {
                                         onChange={(e) => setSelectedTicket((prev) => ({ ...prev, quantity: e.target.value }))}
                                     />
                                 </div>
-                                <div className="w-1/2">
-                                    <label className="text-gray-400">Price</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
-                                        placeholder="Enter ticket price"
-                                        value={selectedTicket.price ?? ""}
-                                        onChange={(e) => setSelectedTicket((prev) => ({ ...prev, price: e.target.value }))}
-                                    />
-                                </div>
+                                {
+                                    event.event_type !== 'rsvp' && (
+                                        <>
+                                            <div className="w-1/2">
+                                                <label className="text-gray-400">Price</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full p-3 mt-2 bg-[#131313] text-white rounded-md border border-gray-800"
+                                                    placeholder="Enter ticket price"
+                                                    value={selectedTicket.price ?? ""}
+                                                    onChange={(e) => setSelectedTicket((prev) => ({ ...prev, price: e.target.value }))}
+                                                />
+                                            </div>
+                                        </>
+                                    )
+                                }
                             </div>
                             <div className="mb-4 mt-10">
                                 <div className="flex items-center justify-between">

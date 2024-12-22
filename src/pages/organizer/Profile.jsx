@@ -28,7 +28,7 @@ const Profile = () => {
   const handleCopy = (e) => {
     e.preventDefault();
     const formattedName = organizer.url.replace(/\s+/g, '-');
-    navigator.clipboard.writeText(`http://localhost:5173/profile-url/${organizer._id}/${formattedName}`);
+    navigator.clipboard.writeText(`https://avenue.tickets/profile-url/${organizer._id}/${formattedName}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

@@ -51,6 +51,28 @@ const Eventinfo = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [soldTickets, setSoldTickets] = useState(0);
     const [totalQuantity, setTotalQuantity] = useState(0);
+    const [visitData, setVisitData] = useState({});
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchVisitData = async () => {
+            try {
+                const response = await fetch(`${url}/visit/get-visit/${id}`);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch visit data");
+                }
+
+                const data = await response.json();
+                setVisitData(data.data);
+                setLoading(false);
+            } catch (error) {
+                setError(error.message);
+            }
+        };
+
+        fetchVisitData();
+    }, [id]);
 
     const fetchOrganizer = async () => {
         if (oragnizerId) {
@@ -198,6 +220,16 @@ const Eventinfo = () => {
         return <div>Loading...</div>;
     }
 
+    const handleCopyLink = () => {
+        const url = `https://avenue.tickets/event-copy/${event._id}`;
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                alert("Event Link copied to clipboard!");
+            })
+            .catch((err) => {
+                console.error("Failed to copy the link: ", err);
+            });
+    };
 
     return (
         <>
@@ -220,7 +252,7 @@ const Eventinfo = () => {
                         <>
                             <div className="flex-1 flex flex-col p-10 overflow-y-auto no-scrollbar">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h1 className="text-3xl font-semibold text-white">{event.event_name}</h1>
+                                    <h1 className="text-3xl font-semibold text-white"><span onClick={handleCopyLink} className="cursor-pointer hover:underline">{event.event_name}</span> <span className="text-lg">({visitData.count} Visits)</span></h1>
                                     <div className="flex justify-between items-center mb-4 gap-2">
                                         <a
                                             className="bg-black text-white font-semibold py-2 px-4 rounded-md transition-colors"
@@ -299,7 +331,7 @@ const Eventinfo = () => {
                                             </div>
                                         </div>
                                         <h3 className="mt-1 text-lg font-semibold text-gray-500">
-                                            Sold Out
+                                            Sold
                                         </h3>
                                     </div>
 

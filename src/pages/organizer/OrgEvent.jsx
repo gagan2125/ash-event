@@ -146,7 +146,7 @@ const OrgEvent = () => {
             <div className="flex justify-between items-center gap-4">
               <a
                 className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
-                href="/create-event"
+                href="/choose-event"
               >
                 + Add Event
               </a>

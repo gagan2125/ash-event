@@ -45,7 +45,13 @@ const MyProfile = () => {
                     setEmail(userData.email);
                     setPhoneNumber(userData.phoneNumber);
                     setProfileImage(userData.profile_image)
-                    setSelectedCountryCode(userData.phoneNumber.substring(0, 3));
+                    //setSelectedCountryCode(userData.phoneNumber.substring(0, 3));
+                    console.log("show in events", response.data)
+                    if (userData.showInEvent === "YES") {
+                        setPrivacyStatus(true);
+                    } else {
+                        setPrivacyStatus(false);
+                    }
                     setLoading(false);
                 })
                 .catch((error) => {
@@ -226,12 +232,13 @@ const MyProfile = () => {
                         <h2 className="text-xl font-bold text-white mb-4">Privacy</h2>
                         <div className="flex justify-between items-center">
                             <p className="text-white text-sm">
-                                Hide me from Guest Lists : <span className='text-xl'>{privacyStatus ? "Visible" : "Hidden"}</span>
+                                Hide me from Guest Lists:{" "}
+                                <span className="text-xl">{privacyStatus ? "Visible" : "Hidden"}</span>
                             </p>
                             <input
                                 type="checkbox"
-                                checked={privacyStatus}
-                                onChange={(e) => handlePrivacyChange(e.target.checked)}
+                                checked={privacyStatus} // This should reflect the state value
+                                onChange={(e) => handlePrivacyChange(e.target.checked)} // This triggers the state change
                                 className="h-6 w-6"
                             />
                         </div>
@@ -239,8 +246,6 @@ const MyProfile = () => {
                 );
             case "Settings":
                 return <div className="text-white">Settings Content</div>;
-            case "Logout":
-                return <div className="text-white">Logout Section</div>;
             default:
                 return null;
         }
@@ -256,7 +261,6 @@ const MyProfile = () => {
                             { name: "Basic", label: "Basic Info" },
                             { name: "Privacy", label: "Privacy" },
                             { name: "Settings", label: "Settings" },
-                            { name: "Logout", label: "Logout" },
                         ].map((tab) => (
                             <li
                                 key={tab.name}

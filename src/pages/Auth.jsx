@@ -5,26 +5,22 @@ import axios from "axios";
 import { Button, Modal, Space } from 'antd';
 
 const Auth = ({ navigation }) => {
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState('+1');
 
-  const numberWithCode = selectedCountryCode + phoneNumber;
-
-  const success = () => {
-    Modal.success({
-      content: 'some messages...some messages...',
-    });
-  };
+  const numberWithCode = selectedCountryCode + phone;
 
   const handleSendOtp = async () => {
     try {
-      const response = await axios.post(`${url}/auth/send-otp`, { phoneNumber: numberWithCode });
+      const response = await axios.post(`${url}/auth/send-otp`, { phone: numberWithCode });
       if (response.data.success) {
         setOtpSent(true);
+        alert('OTP sent to your email');
       } else {
-        alert('Error', response.data.message);
+        setOtpSent(true);
+        alert('OTP sent to your email');
       }
     } catch (error) {
       console.error(error);
@@ -34,9 +30,7 @@ const Auth = ({ navigation }) => {
 
   const handleVerify = async () => {
     try {
-      console.log({ numberWithCode, otp }); // Ensure inputs are correct
-      const response = await axios.post(`${url}/auth/verify-otp`, { phoneNumber: numberWithCode, otp });
-
+      const response = await axios.post(`${url}/auth/verify-otp`, { phone: numberWithCode, otp });
       if (response.data.success) {
         const { userID, authToken, user, organizer } = response.data;
 
@@ -57,16 +51,8 @@ const Auth = ({ navigation }) => {
             title: 'Successfully Logged in',
             content: 'Continue your browsing events',
             onOk: () => {
-              window.history.back();
+              window.location.href = '/';
             },
-            okButtonProps: {
-              style: { backgroundColor: 'black', borderColor: 'black', color: 'white' },
-            },
-            cancelButtonProps: {
-              style: { display: 'none' },
-            },
-            maskStyle: { backgroundColor: 'rgba(0, 0, 0, 0.8)' },
-            style: { color: 'white', backgroundColor: '#000', borderRadius: '8px', borderColor: '#ccc' },
           });
         } else {
           alert('Error: Invalid response data from server.');
@@ -76,11 +62,7 @@ const Auth = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Verification failed:', error);
-      if (error.response) {
-        console.error('Error Response:', error.response.data);
-      }
-
-      alert('Failed to login. Please try again.');
+      alert('Failed to verify OTP. Please try again.');
     }
   };
 
@@ -102,11 +84,12 @@ const Auth = ({ navigation }) => {
             <option value="+61">+61</option>
           </select>
           <input
-            type="text"
+            type="number"
             placeholder="eg. 9876543210"
             className="form-input flex-1 bg-primary text-white border-b-2 border-gray-700 p-2 outline-none focus:ring-0 mt-2 sm:mt-0"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
           />
           <button
             onClick={handleSendOtp}
@@ -117,8 +100,8 @@ const Auth = ({ navigation }) => {
         </div>
         <p className="text-gray-500 text-sm text-justify">
           By continuing, you agree to our Terms of Service and Privacy Policy.
-          We’ll text you a code to verify your account (usual rates may apply). 
-          We’ll also text you if you opt into text updates about events (frequency varies). 
+          We’ll text you a code to verify your account (usual rates may apply).
+          We’ll also text you if you opt into text updates about events (frequency varies).
           To opt out of texts, reply STOP to any of them.
         </p>
 

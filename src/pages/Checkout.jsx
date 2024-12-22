@@ -134,6 +134,32 @@ const Checkout = () => {
     }
   };
 
+  const handleRSVPAdd = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await axios.post(`${url}/create-payment-intent-rsvp`, {
+        amount: 0,
+        organizerId: organizerId,
+        userId: userId,
+        eventId: eventId,
+        date: Date.now(),
+        status: "pending",
+        count: count,
+        ticketId: selectedTicketId,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email
+      });
+      if (response.data.success === true) {
+        window.location.href = `/qr-ticket/${response.data.paymentId}`;
+      }
+    } catch (error) {
+      setPaymentError(error.message);
+    } finally {
+      setPaymentProcessing(false);
+    }
+  }
+
   const cardElementOptions = {
     style: {
       base: {
@@ -233,7 +259,7 @@ const Checkout = () => {
         </div>
       </div>
       {
-        userName && (
+        event.event_type !== 'rsvp' && userName ? (
           <>
             <form onSubmit={handlePayment} className="w-full max-w-md mt-4">
               <div className="bg-[#0b0b0b] p-4 rounded-lg">
@@ -262,6 +288,10 @@ const Checkout = () => {
                 </button>
               </div>
             </form>
+          </>
+        ) : (
+          <>
+            <button onClick={handleRSVPAdd} className="mt-3 px-10 py-1 bg-gray-300 rounded-md">Book</button>
           </>
         )
       }

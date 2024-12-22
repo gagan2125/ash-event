@@ -38,6 +38,15 @@ import EventPreview from "./pages/organizer/EventPreview";
 import QrScan from "./pages/organizer/QrScan";
 import Tickets from "./pages/organizer/Tickets";
 import TicketInfo from "./pages/organizer/TicketInfo";
+import AddMember from "./pages/organizer/AddMember";
+import EditMember from "./pages/organizer/EditMember";
+import EventAnalytics from "./pages/organizer/EventAnalytics";
+import LoginMember from "./pages/member/LoginMember";
+import HomeMember from "./pages/member/HomeMember";
+import MemberQRScanner from "./pages/member/MemberQRScanner";
+import ScannedTickets from "./pages/member/ScannedTickets";
+import ChooseEvent from "./pages/organizer/ChooseEvent";
+import EventCopy from "./pages/organizer/EventCopy";
 
 function App() {
   const location = useLocation();
@@ -64,7 +73,15 @@ function App() {
     '/members',
     '/qr-scanner',
     '/tickets',
-    '/ticket-info'
+    '/ticket-info',
+    '/add-member',
+    '/edit-member',
+    '/event-analytics',
+    '/member-login',
+    '/home-member',
+    '/member-qr-scanner',
+    '/scanned-tickets',
+    '/choose-event',
   ];
 
   const shouldHideNavbarAndFooter = hideNavbarAndFooterPaths.some((path) =>
@@ -97,13 +114,13 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashbaord />} />
         <Route path="/org-event" element={<OrgEvent />} />
-        <Route path="/create-event" element={<Create />} />
+        <Route path="/create-event/:type" element={<Create />} />
         <Route path="/finance" element={<Finance />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/market" element={<Makert />} />
         <Route path="/basic-info" element={<BasicDetails />} />
-        <Route path="/create-event-user" element={<CreateUserEvent />} />
+        <Route path="/create-event-user/:type" element={<CreateUserEvent />} />
         <Route path="/edit-event/:id" element={<Edit />} />
         <Route path="/qr-ticket/:id" element={<QrTicket />} />
         <Route path="/onboarding-success/:accountId" element={<OnboardingSuccess />} />
@@ -116,6 +133,15 @@ function App() {
         <Route path="/qr-scanner" element={<QrScan />} />
         <Route path="/tickets/:id" element={<Tickets />} />
         <Route path="/ticket-info/:id" element={<TicketInfo />} />
+        <Route path="/add-member" element={<AddMember />} />
+        <Route path="/edit-member/:id" element={<EditMember />} />
+        <Route path="/event-analytics/:id" element={<EventAnalytics />} />
+        <Route path="/member-login" element={<LoginMember />} />
+        <Route path="/home-member/:id" element={<HomeMember />} />
+        <Route path="/member-qr-scanner/:id" element={<MemberQRScanner />} />
+        <Route path="/scanned-tickets/:id" element={<ScannedTickets />} />
+        <Route path="/choose-event" element={<ChooseEvent />} />
+        <Route path="/event-copy/:id" element={<EventCopy />} />
       </Routes>
       {!shouldHideNavbarAndFooter && <Footer />}
     </div>
