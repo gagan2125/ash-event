@@ -17,10 +17,10 @@ const Auth = ({ navigation }) => {
       const response = await axios.post(`${url}/auth/send-otp`, { phone: numberWithCode });
       if (response.data.success) {
         setOtpSent(true);
-        alert('OTP sent to your email');
+        alert('OTP sent to your Mobile Number');
       } else {
         setOtpSent(true);
-        alert('OTP sent to your email');
+        alert('OTP sent to your Mobile Number');
       }
     } catch (error) {
       console.error(error);

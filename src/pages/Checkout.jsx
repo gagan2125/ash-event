@@ -100,7 +100,7 @@ const Checkout = () => {
 
     try {
       const response = await axios.post(`${url}/create-payment-intent`, {
-        amount: Math.round(parseFloat(count * selectedTicketPrice) * 100),
+        amount: Math.round(parseFloat(count * selectedTicketPrice * 0.02) * 100),
         organizerId: organizerId,
         userId: userId,
         eventId: eventId,
