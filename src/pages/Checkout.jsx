@@ -17,7 +17,7 @@ const Checkout = () => {
 
   const [details, setDetails] = useState(false)
   const [basicModal, setBasicModal] = useState(false)
-  const [total, setTotal] = useState(false)
+  const [total, setTotal] = useState("")
 
   const [formData, setFormData] = useState({
     firstName: '',
