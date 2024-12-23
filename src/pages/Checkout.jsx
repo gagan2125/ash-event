@@ -17,7 +17,6 @@ const Checkout = () => {
 
   const [details, setDetails] = useState(false)
   const [basicModal, setBasicModal] = useState(false)
-  const [total, setTotal] = useState("")
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -86,7 +85,6 @@ const Checkout = () => {
   const calculateTotal = () => {
     const subtotal = count * selectedTicketPrice;
     const platformFee = subtotal * 0.02;
-    setTotal((subtotal + platformFee).toFixed(2))
     return (subtotal + platformFee).toFixed(2);
   };
 
@@ -102,7 +100,7 @@ const Checkout = () => {
 
     try {
       const response = await axios.post(`${url}/create-payment-intent`, {
-        amount: total * 100,
+        amount: Math.round(parseFloat(count * selectedTicketPrice) * 100),
         organizerId: organizerId,
         userId: userId,
         eventId: eventId,
