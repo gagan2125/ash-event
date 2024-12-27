@@ -7,7 +7,8 @@ import { Button, Modal, Space } from 'antd';
 
 const Checkout = () => {
   const location = useLocation();
-  const { selectedTicketPrice, count, eventId, selectedTicketId, selectedTicketName } = location.state || {};
+  //const { selectedTicketPrice, count, eventId, selectedTicketId, selectedTicketName } = location.state || {};
+
   const [event, setEvent] = useState({});
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
@@ -23,10 +24,49 @@ const Checkout = () => {
     lastName: '',
     email: '',
   });
+  const [promos, setPromos] = useState([]);
 
+  const selectedTicketPrice = localStorage.getItem('selectedTicketPrice') || {};
+  const count = localStorage.getItem('count') || {};
+  const selectedTicketId = localStorage.getItem('selectedTicketId') || {};
+  const selectedTicketName = localStorage.getItem('selectedTicketName') || {};
+  const eventId = localStorage.getItem('event_id') || {};
 
   const stripe = useStripe();
   const elements = useElements();
+
+  const [promoCode, setPromoCode] = useState('');
+  const [amount, setAmount] = useState(null);
+  const [type, setType] = useState('');
+
+
+  const handleApply = () => {
+    const matchedPromo = promos.find(promo => promo.code === promoCode);
+    if (matchedPromo) {
+      setAmount(matchedPromo.amount);
+      setType(matchedPromo.type);
+      console.log(`Promo code applied: ${promoCode}, Amount: ${matchedPromo.amount}, Type: ${matchedPromo.type}`);
+    } else {
+      alert("Promo code not valid")
+      console.log('Promo code not valid');
+      setAmount(null);
+      setType('');
+    }
+  };
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(`${url}/promo/get-promo/${eventId}`);
+      const eventData = response.data;
+      setPromos(response.data);
+      console.log(response.data)
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+  useEffect(() => {
+    fetchEvents()
+  }, [eventId])
 
   useEffect(() => {
     if (userId) {
@@ -76,16 +116,31 @@ const Checkout = () => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const day = date.getDate();
-    const month = date.toLocaleString("en-US", { month: "short" });
+    const month = date.toLocaleString('en-US', { month: 'short' });
     const year = date.getFullYear().toString().slice(-2);
-    const time = date.toTimeString().slice(0, 5);
-    return `${day} ${month} ${year} ${time}`;
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    return `${day} ${month} ${year} ${hours}:${minutes} ${ampm}`;
   };
 
   const calculateTotal = () => {
     const subtotal = count * selectedTicketPrice;
     const platformFee = subtotal * 0.02;
-    return (subtotal + platformFee).toFixed(2);
+    let total = subtotal + platformFee;
+    if (amount && type) {
+      if (type === 'amount') {
+        total -= parseFloat(amount);
+      } else if (type === 'percentage') {
+        const discount = (total * parseFloat(amount)) / 100;
+        total -= discount;
+      }
+    }
+    return total.toFixed(2);
   };
 
   const handlePayment = async (event) => {
@@ -253,10 +308,40 @@ const Checkout = () => {
           <span className="text-white">${(count * selectedTicketPrice * 0.02).toFixed(2)}</span>
         </div>
         <div className="border-t border-gray-600 my-3" />
-        <div className="flex justify-between">
+        {
+          type && (
+            <>
+              <div className="flex justify-between">
+                <span className="text-white">Coupon</span>
+                <span className="text-white font-bold">
+                  {
+                    type === 'amount' ?
+                      `$${amount}` : `${amount}%`
+                  }
+                </span>
+              </div>
+            </>
+          )
+        }
+        <div className="flex justify-between mt-2">
           <span className="text-white font-bold">Total</span>
           <span className="text-white font-bold">${calculateTotal()}</span>
         </div>
+      </div>
+      <div className="flex items-center mt-3 w-full max-w-md">
+        <input
+          type="text"
+          value={promoCode}
+          onChange={(e) => setPromoCode(e.target.value)}
+          placeholder="Enter promo code"
+          className="flex-grow p-2 rounded-l-md border border-gray-800 bg-black text-white focus:outline-none"
+        />
+        <button
+          onClick={handleApply}
+          className="bg-yellow-500 text-black font-semibold p-2 rounded-r-md hover:bg-yellow-400 transition duration-200"
+        >
+          Apply
+        </button>
       </div>
       {
         event.event_type !== 'rsvp' && userName ? (

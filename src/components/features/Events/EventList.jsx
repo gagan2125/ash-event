@@ -35,15 +35,21 @@ const EventList = () => {
     const day = date.getDate();
     const month = date.toLocaleString('en-US', { month: 'short' });
     const year = date.getFullYear().toString().slice(-2);
-    const time = date.toTimeString().slice(0, 5); // Extract HH:mm
-    return `${day} ${month} ${year} ${time}`;
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    return `${day} ${month} ${year} ${hours}:${minutes} ${ampm}`;
   };
 
   const handleDetail = (id, name) => {
-    navigate(`/event/${name}`, {
-      state: { id: id },
-    });
+    localStorage.setItem('event_id', id);
+    navigate(`/${name}`);
   };
+
 
   // const events = [
   //   {
@@ -140,18 +146,18 @@ const EventList = () => {
     const eventDate = new Date(event.start_date);
     const minPrice = sliderValue[0];
     const maxPrice = sliderValue[1];
-  
+
     const isWithinPriceRange =
       (event.ticket_start_price || 0) >= minPrice &&
       (event.ticket_start_price || 0) <= maxPrice;
-  
+
     return (
       event.explore === "YES" &&
       (!selectedDate || eventDate.toDateString() === selectedDate.toDateString()) &&
       isWithinPriceRange
     );
   });
-  
+
 
   return (
     <div className="bg-primary py-8">

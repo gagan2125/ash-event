@@ -51,7 +51,7 @@ const Auth = ({ navigation }) => {
             title: 'Successfully Logged in',
             content: 'Continue your browsing events',
             onOk: () => {
-              window.location.href = '/';
+              window.history.back();
             },
           });
         } else {

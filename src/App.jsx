@@ -47,6 +47,8 @@ import MemberQRScanner from "./pages/member/MemberQRScanner";
 import ScannedTickets from "./pages/member/ScannedTickets";
 import ChooseEvent from "./pages/organizer/ChooseEvent";
 import EventCopy from "./pages/organizer/EventCopy";
+import Complimentary from "./pages/organizer/Complimentary";
+import Promo from "./pages/organizer/Promo";
 
 function App() {
   const location = useLocation();
@@ -82,6 +84,8 @@ function App() {
     '/member-qr-scanner',
     '/scanned-tickets',
     '/choose-event',
+    '/complimentary',
+    '/promo'
   ];
 
   const shouldHideNavbarAndFooter = hideNavbarAndFooterPaths.some((path) =>
@@ -96,7 +100,7 @@ function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<Events />} />
-        <Route path="/event/:name" element={<SingleEvent />} />
+        <Route path="/:name" element={<SingleEvent />} />
         <Route path="/my-tickets" element={<MyTickets />} />
         <Route path="/payment" element={<PaymentStripe />} />
         <Route path="/launch-event" element={<LaunchEvent />} />
@@ -142,6 +146,8 @@ function App() {
         <Route path="/scanned-tickets/:id" element={<ScannedTickets />} />
         <Route path="/choose-event" element={<ChooseEvent />} />
         <Route path="/event-copy/:id" element={<EventCopy />} />
+        <Route path="/complimentary/:id" element={<Complimentary />} />
+        <Route path="/promo/:id" element={<Promo />} />
       </Routes>
       {!shouldHideNavbarAndFooter && <Footer />}
     </div>

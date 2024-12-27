@@ -281,7 +281,8 @@ const Profile = () => {
                       </p>
                     </div>
                   </div>
-                </div><div className="border-b border-gray-900/10 pb-0 px-10">
+                </div>
+                <div className="border-b border-gray-900/10 pb-0 px-10">
                   <h2 className="text-base/7 font-semibold text-gray-200">
                     Custom Profile URL
                   </h2>
@@ -291,7 +292,7 @@ const Profile = () => {
                         htmlFor="first-name"
                         className="block text-sm/6 font-medium text-gray-200 mt-3"
                       >
-                        https://ash-event.vercel.app/
+                        https://avenue.tickets/
                       </label>
                     </div>
                     <div className="sm:col-span-3">

@@ -129,7 +129,7 @@ const TicketList = () => {
                     <p className="text-sm leading-6 text-gray-300">${item.amount / 100}</p>
                     <p className="mt-1 text-xs leading-5 text-gray-400">
                       <time dateTime={item.party_id.start_date}>
-                        {new Date(item.party_id.start_date).toLocaleString("en-US", {
+                        {new Date(item.createdAt).toLocaleString("en-US", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",

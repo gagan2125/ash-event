@@ -20,6 +20,8 @@ import axios from "axios";
 import url from "../../constants/url";
 import { useNavigate, useParams } from "react-router-dom";
 import { PiDotsThreeVertical } from "react-icons/pi";
+import { BiDotsVerticalRounded } from "react-icons/bi";
+import { Dropdown, Space } from 'antd';
 
 ChartJS.register(
     CategoryScale,
@@ -53,6 +55,21 @@ const Eventinfo = () => {
     const [totalQuantity, setTotalQuantity] = useState(0);
     const [visitData, setVisitData] = useState({});
     const [error, setError] = useState(null);
+
+    const items = [
+        {
+            key: '1',
+            label: 'Complimentary Tickets',
+            extra: '⌘C',
+            onClick: () => navigate(`/complimentary/${id}`),
+        },
+        {
+            key: '2',
+            label: 'Promo Code',
+            extra: '⌘P',
+            onClick: () => navigate(`/promo/${id}`),
+        },
+    ];
 
     useEffect(() => {
         const fetchVisitData = async () => {
@@ -272,6 +289,17 @@ const Eventinfo = () => {
                                         >
                                             Update Event
                                         </a>
+                                        <Dropdown
+                                            className="text-gray-400 cursor-pointer"
+                                            menu={{
+                                                items,
+                                            }}
+                                            trigger={['click']}
+                                        >
+                                            <Space>
+                                                <BiDotsVerticalRounded size={20} />
+                                            </Space>
+                                        </Dropdown>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -397,12 +425,27 @@ const Eventinfo = () => {
                                                             <p className="text-xl text-white font-medium mb-2">${(payout.amount / 100).toFixed(2)}</p>
                                                             <p className="text-sm text-gray-600 font-medium mb-2">{payout.qr_status === 'true' ? "Checked In" : ""}</p>
                                                             <div className="flex justify-between items-center gap-2 mt-3">
-                                                                <a
-                                                                    className="bg-gray-300 text-black font-medium py-1 px-2 text-sm rounded-md hover:bg-gray-400 transition-colors"
-                                                                    href=''
-                                                                >
-                                                                    Send Ticket
-                                                                </a>
+                                                                {
+                                                                    payout.qr_status === 'true' ? (
+                                                                        <>
+                                                                            <a
+                                                                                className="bg-gray-600 text-black font-medium py-1 px-2 text-sm rounded-md hover:bg-gray-400 transition-colors"
+                                                                                href=''
+                                                                            >
+                                                                                Checked In
+                                                                            </a>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <a
+                                                                                className="bg-gray-300 text-black font-medium py-1 px-2 text-sm rounded-md hover:bg-gray-400 transition-colors"
+                                                                                href=''
+                                                                            >
+                                                                                Send Ticket
+                                                                            </a>
+                                                                        </>
+                                                                    )
+                                                                }
                                                                 <a
                                                                     className="bg-red-800 text-white font-medium py-1 px-2 text-sm rounded-md hover:bg-red-900 transition-colors"
                                                                     href=''

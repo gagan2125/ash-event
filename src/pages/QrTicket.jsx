@@ -35,9 +35,10 @@ const QrTicket = () => {
         year: 'numeric',
     });
 
-    const formattedTime = new Date(book.party_id?.start_date).toLocaleTimeString('en-GB', {
-        hour: '2-digit',
+    const formattedTime = new Date(book.party_id?.start_date).toLocaleString('en-US', {
+        hour: 'numeric',
         minute: '2-digit',
+        hour12: true,
     });
 
     return (
