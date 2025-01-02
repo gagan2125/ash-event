@@ -55,6 +55,15 @@ const Eventinfo = () => {
     const [totalQuantity, setTotalQuantity] = useState(0);
     const [visitData, setVisitData] = useState({});
     const [error, setError] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [refundDetails, setRefundDetails] = useState({
+        firstName: "",
+        lastName: "",
+        amount: 0,
+        paymentId: ""
+    });
+    const [inputAmount, setInputAmount] = useState(0); // Temporary state for input
+
 
     const items = [
         {
@@ -217,8 +226,17 @@ const Eventinfo = () => {
             const response = await axios.get(`${url}/get-event-payment-list/${id}`);
             setBook(response.data);
 
-            const total = response.data.reduce((acc, event) => acc + event.amount, 0);
+            const total = response.data.reduce((acc, payout) => {
+                const ticket = payout?.party_id?.tickets.find(ticket => ticket._id === payout.ticketId && payout.refund === 'false');
+                const price = ticket?.price || 0;
+                const count = payout?.count || 0;
+                const tax = payout.refund === 'false' ? parseFloat(payout?.party_id?.tax) || 0 : 0;
+
+                const payoutAmount = ((price) + (tax / 100)).toFixed(2);
+                return acc + parseFloat(payoutAmount);
+            }, 0);
             setTotalAmount(total);
+
 
             const soldTickets = response.data.reduce((acc, event) => acc + Number(event.count), 0);
             setSoldTickets(soldTickets)
@@ -246,6 +264,65 @@ const Eventinfo = () => {
             .catch((err) => {
                 console.error("Failed to copy the link: ", err);
             });
+    };
+
+    const handleInputChange = (e) => {
+        const { value } = e.target;
+        setRefundDetails((prevDetails) => ({
+            ...prevDetails,
+            amount: value,
+        }));
+    };
+
+    const handleRefundClick = (payout) => {
+        console.log(payout)
+        const ticketId = payout.ticketId;
+        const matchingParty = payout?.party_id?.tickets?.find(party => party._id === ticketId);
+
+        const ticketPrice = payout.count * matchingParty.price;
+
+        if (matchingParty) {
+            const ticketPriceWithTax = ticketPrice + (payout?.party_id?.tax / 100);
+            setRefundDetails({
+                firstName: payout?.user_id?.firstName || "Complimentary",
+                lastName: payout?.user_id?.lastName || "Ticket",
+                amount: ticketPriceWithTax.toFixed(2),
+                partyDetails: matchingParty,
+                paymentId: payout.transaction_id
+            });
+            setInputAmount(ticketPriceWithTax.toFixed(2));
+        }
+        else {
+            console.error(`No matching party found for ticketId: ${ticketId}`);
+        }
+
+        setShowModal(true);
+    };
+
+    const handleRefund = async () => {
+        try {
+            const refundRequest = axios.post(`${url}/refund`, {
+                paymentIntentId: refundDetails.paymentId,
+                amount: refundDetails.amount,
+            });
+
+            const updateStatusRequest = axios.post(`${url}/updateRefundStatus`, {
+                paymentId: refundDetails.paymentId,
+                refund: true,
+            });
+
+            const [refundResponse, statusResponse] = await Promise.all([refundRequest, updateStatusRequest]);
+
+            alert("Refund processed successfully");
+            window.location.reload()
+            setShowModal(false);
+
+            console.log("Refund Response:", refundResponse.data);
+            console.log("Status Update Response:", statusResponse.data);
+        } catch (error) {
+            console.error("Error processing refund or updating status:", error);
+            alert("Refund or status update failed. Please try again.");
+        }
     };
 
     return (
@@ -308,7 +385,7 @@ const Eventinfo = () => {
                                     >
                                         <div className="flex justify-between items-center">
                                             <div className="text-2xl font-bold text-gray-200">
-                                                ${(totalAmount / 100).toFixed(2) || 0}
+                                                ${(totalAmount).toFixed(2) || 0}
                                             </div>
 
                                             <div className="flex space-x-2">
@@ -399,12 +476,11 @@ const Eventinfo = () => {
                                             book.map((payout, index) => {
                                                 return (
                                                     <li
-                                                        onClick={() => navigate(`/ticket-info/${payout._id}`)}
                                                         key={index}
                                                         className="bg-[#101010] p-4 rounded-lg flex justify-between hover:border hover:border-gray-700"
                                                     >
-                                                        <div>
-                                                            <p className="text-lg text-white font- mb-2">{payout.user_id.firstName} {payout.user_id.lastName}</p>
+                                                        <div onClick={() => navigate(`/ticket-info/${payout._id}`)}>
+                                                            <p className="text-lg text-white font- mb-2">{payout?.user_id?.firstName || "Complimentary"} {payout?.user_id?.lastName || "Ticket"}</p>
                                                             <p className="text-sm text-gray-300 mb-1">{payout.email}</p>
                                                             <p className="text-sm text-gray-400">
                                                                 {new Date(payout.date).toLocaleDateString('en-GB', {
@@ -422,7 +498,9 @@ const Eventinfo = () => {
                                                             {/* <p className="text-sm text-gray-400">Transaction ID: {payout.transaction_id}</p> */}
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="text-xl text-white font-medium mb-2">${(payout.amount / 100).toFixed(2)}</p>
+                                                            <p className="text-xl text-white font-medium mb-2">
+                                                                ${((payout?.party_id?.tickets.find(ticket => ticket._id === payout.ticketId)?.price * payout.count) + (parseFloat(payout?.party_id?.tax) / 100)).toFixed(2)}
+                                                            </p>
                                                             <p className="text-sm text-gray-600 font-medium mb-2">{payout.qr_status === 'true' ? "Checked In" : ""}</p>
                                                             <div className="flex justify-between items-center gap-2 mt-3">
                                                                 {
@@ -446,12 +524,26 @@ const Eventinfo = () => {
                                                                         </>
                                                                     )
                                                                 }
-                                                                <a
-                                                                    className="bg-red-800 text-white font-medium py-1 px-2 text-sm rounded-md hover:bg-red-900 transition-colors"
-                                                                    href=''
-                                                                >
-                                                                    Refund
-                                                                </a>
+                                                                {
+                                                                    payout.refund === 'true' ? (
+                                                                        <>
+                                                                            <a
+                                                                                className="bg-green-800 text-white font-medium py-1 px-2 text-sm rounded-md hover:bg-green-900 transition-colors cursor-pointer"
+                                                                            >
+                                                                                Refunded
+                                                                            </a>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <a
+                                                                                className="bg-red-800 text-white font-medium py-1 px-2 text-sm rounded-md hover:bg-red-900 transition-colors cursor-pointer"
+                                                                                onClick={() => handleRefundClick(payout)}
+                                                                            >
+                                                                                Refund
+                                                                            </a>
+                                                                        </>
+                                                                    )
+                                                                }
                                                             </div>
                                                         </div>
                                                     </li>
@@ -459,9 +551,61 @@ const Eventinfo = () => {
                                             })
                                         )}
                                     </ul>
-
                                 </div>
                             </div>
+                            {showModal && (
+                                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                                    <div className="bg-white rounded-lg shadow-lg p-6 w-1/3 relative">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h2 className="text-lg font-bold text-gray-800">Send Refund for {refundDetails.firstName} {refundDetails.lastName}</h2>
+                                            <button
+                                                className="text-gray-500 hover:text-gray-800"
+                                                onClick={() => setShowModal(false)}
+                                            >
+                                                X
+                                            </button>
+                                        </div>
+                                        <div className="mb-4">
+                                            <label
+                                                htmlFor="refundAmount"
+                                                className="block text-sm font-medium text-gray-700 mb-1"
+                                            >
+                                                Refund Amount
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="refundAmount"
+                                                value={inputAmount}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value);
+                                                    if (isNaN(value) || value <= parseFloat(refundDetails.amount)) {
+                                                        setInputAmount(e.target.value);
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    const value = parseFloat(inputAmount);
+                                                    if (!isNaN(value) && value <= parseFloat(refundDetails.amount)) {
+                                                        setRefundDetails((prev) => ({
+                                                            ...prev,
+                                                            amount: value.toFixed(2),
+                                                        }));
+                                                    }
+                                                }}
+                                                className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Enter refund amount"
+                                            />
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <button
+                                                onClick={handleRefund}
+                                                className="bg-red-800 text-white font-medium py-2 px-4 rounded-md hover:bg-red-900 transition-colors"
+                                            >
+                                                Refund
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {/* <div className="w-1/5 bg-black text-white flex flex-col p-6 overflow-y-auto border-l border-gray-800">
                                 <h2 className="text-xl font-semibold mb-4 flex items-center justify-between">
                                     All Bookings

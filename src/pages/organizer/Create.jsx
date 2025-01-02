@@ -11,6 +11,7 @@ import { Loader } from 'rsuite';
 import SidebarComponent from "../../components/layouts/SidebarComponent";
 import { X, ChevronDown } from 'lucide-react';
 import { useParams } from "react-router-dom";
+import ImageCropper from '../../components/features/Events/ImageCropper';
 
 const Create = () => {
   const { type } = useParams()
@@ -31,6 +32,8 @@ const Create = () => {
   const [venueName, setVenueName] = useState("");
   const [address, setAddress] = useState("");
   const [category, setCategory] = useState("")
+  const [tax, setTax] = useState("");
+  const [errorTax, setErrorTax] = useState('');
   const [language, setLanguage] = useState('');
   const [duration, setDuration] = useState('')
   const [minAge, setMinAge] = useState();
@@ -64,6 +67,83 @@ const Create = () => {
 
   const suggestions = members.map(member => member.name);
   const [filteredSuggestions, setFilteredSuggestions] = useState(suggestions);
+  const [isCropperVisible, setCropperVisible] = useState(false);
+
+  const [showInputs, setShowInputs] = useState(false);
+  const [profiles, setProfiles] = useState([]);
+  const [profile, setProfile] = useState({
+    line_name: "",
+    line_profile_photo: null,
+    line_instagram_link: "",
+    line_time: "",
+  });
+  const [files, setFiles] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+
+  const handleTaxChange = (e) => {
+    const value = e.target.value;
+    if (parseFloat(value) > 9.56) {
+      setTax('9.56'); 
+      setError("Tax can't be greater than 9.56");
+    } else {
+      setTax(value);
+      setError('');
+    }
+  };
+
+  const handleLineChange = (e) => {
+    const { name, value } = e.target;
+    setProfile((prevProfile) => ({ ...prevProfile, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfile((prevProfile) => ({
+        ...prevProfile,
+        line_profile_photo: file,
+      }));
+    }
+  };
+
+  const handleAddOrUpdateProfile = () => {
+    if (isEditing) {
+      setProfiles((prevProfiles) =>
+        prevProfiles.map((p, index) =>
+          index === editIndex ? profile : p
+        )
+      );
+      setIsEditing(false);
+      setEditIndex(null);
+    } else {
+      setProfiles((prevProfiles) => [...prevProfiles, profile]);
+    }
+    setProfile({
+      line_name: "",
+      line_profile_photo: null,
+      line_instagram_link: "",
+      line_time: "",
+    });
+    setFiles(null);
+  };
+
+  const handleEditProfile = (index) => {
+    setIsEditing(true);
+    setEditIndex(index);
+    const selectedProfile = profiles[index];
+    setProfile({
+      line_name: selectedProfile.line_name,
+      line_profile_photo: selectedProfile.line_profile_photo,
+      line_instagram_link: selectedProfile.line_instagram_link,
+      line_time: selectedProfile.line_time,
+    });
+  };
+
+  const handleDeleteProfile = (index) => {
+    setProfiles((prevProfiles) => prevProfiles.filter((_, i) => i !== index));
+  };
+
 
   const items = [
     ...(accountId
@@ -148,16 +228,70 @@ const Create = () => {
 
   const handleImageChange = (event) => {
     const file_upload = event.target.files[0];
-    setFile(file_upload);
 
     if (file_upload) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelectedImage(reader.result);
+        setCropperVisible(true);
       };
       reader.readAsDataURL(file_upload);
     }
   };
+
+  const dataURLtoFile = (dataurl, filename) => {
+    if (!dataurl || !dataurl.startsWith("data:image/")) {
+      console.error("Invalid data URL:", dataurl);
+      return null;
+    }
+
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
+  const blobURLToFile = async (blobURL, filename) => {
+    try {
+      const response = await fetch(blobURL);
+      const blob = await response.blob();
+      return new File([blob], filename, { type: blob.type });
+    } catch (error) {
+      console.error("Error converting blob URL to file:", error);
+      return null;
+    }
+  };
+
+  const handleCropDone = async (croppedImage) => {
+    console.log("Cropped Image:", croppedImage);
+    try {
+      let croppedFile;
+      if (croppedImage.startsWith("data:image/")) {
+        croppedFile = dataURLtoFile(croppedImage, 'cropped-image.webp');
+      } else if (croppedImage.startsWith("blob:")) {
+        croppedFile = await blobURLToFile(croppedImage, 'cropped-image.webp');
+      }
+      if (croppedFile) {
+        setFile(croppedFile);
+        setSelectedImage(URL.createObjectURL(croppedFile));
+      } else {
+        console.error("Failed to handle cropped image");
+      }
+    } catch (error) {
+      console.error("Error handling cropped image:", error);
+    }
+    setCropperVisible(false);
+  };
+
+  const handleCropCancel = () => {
+    setCropperVisible(false);
+  };
+
   const handleAddTicketClick = () => {
     setIsSidebarVisible(!isSidebarVisible);
   };
@@ -188,6 +322,12 @@ const Create = () => {
     min_count: ticket.minLimit,
     max_count: ticket.maxLimit,
     ticket_description: ticket.ticketDescription
+  }));
+
+  const formattedLineUp = profiles.map((ticket) => ({
+    name: ticket.line_name,
+    instagram_link: ticket.line_instagram_link,
+    time: ticket.line_time,
   }));
 
   useEffect(() => {
@@ -228,6 +368,7 @@ const Create = () => {
     formData.append('ticket_start_price', startPrice);
     formData.append('font', "");
     formData.append('color', "");
+    formData.append('tax', tax);
     formData.append('explore', isExplore ? "YES" : "NO");
     formData.append('show', isShow ? "YES" : "NO");
 
@@ -239,6 +380,12 @@ const Create = () => {
 
     tags.forEach((tag, index) => {
       formData.append(`members[${index}]`, tag.id);
+    });
+
+    formattedLineUp.forEach((line, index) => {
+      for (const key in line) {
+        formData.append(`social_profiles[${index}][${key}]`, line[key]);
+      }
     });
 
     try {
@@ -503,6 +650,18 @@ const Create = () => {
                   onChange={(e) => setCategory(e.target.value)}
                 />
               </div>
+              <div>
+                <input
+                  type="text"
+                  className="p-3 w-full bg-black rounded-md focus:outline-none text-white border border-[#5d5d5d] focus:border-[#ccc] shadow-lg shadow-[#3f3f3f] focus:shadow-md focus:shadow-white"
+                  placeholder="Enter Tax in % (Optional)"
+                  value={tax}
+                  onChange={handleTaxChange}
+                />
+                <p className="text-gray-500 mt-2">
+                  Tax should not be greater than 9.56%
+                </p>
+              </div>
               <div className="w-full" ref={wrapperRef}>
                 <div className="border rounded-lg p-2 bg-black">
                   <div className="flex flex-wrap gap-2">
@@ -570,34 +729,139 @@ const Create = () => {
                   placeholder="Describe your event here..."
                 />
               </div>
+              <div className="mb-4 py-10">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    onChange={(e) => setShowInputs(e.target.checked)}
+                  />
+                  <span>Add Social Profile</span>
+                </label>
+              </div>
+
+              {showInputs && (
+                <div className="space-y-4 border p-4 rounded-lg mb-4">
+                  <div className="flex flex-col space-y-2">
+                    <input
+                      type="text"
+                      name="line_name"
+                      value={profile.line_name}
+                      onChange={handleLineChange}
+                      placeholder="Name"
+                      className="border p-2 rounded bg-black text-white"
+                    />
+                    <input
+                      type="file"
+                      name="line_profile_photo"
+                      onChange={handleFileChange}
+                      className="border p-2 rounded bg-black text-white"
+                    />
+                    <input
+                      type="text"
+                      name="line_instagram_link"
+                      value={profile.line_instagram_link}
+                      onChange={handleLineChange}
+                      placeholder="Instagram Link"
+                      className="border p-2 rounded bg-black text-white"
+                    />
+                    <input
+                      type="time"
+                      name="line_time"
+                      value={profile.line_time}
+                      onChange={handleLineChange}
+                      className="border p-2 rounded bg-black text-white"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddOrUpdateProfile}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  >
+                    {isEditing ? "Update Profile" : "Add Profile"}
+                  </button>
+                </div>
+              )}
+
+              {/* Display added profiles */}
+              <div className="grid grid-cols-2 gap-4">
+                {profiles.map((p, index) => (
+                  <div
+                    key={index}
+                    className="border rounded-lg p-4 shadow-md flex flex-col items-start"
+                  >
+                    <h3 className="font-bold">{p.line_name}</h3>
+                    {p.line_profile_photo && (
+                      <img
+                        src={
+                          p.line_profile_photo instanceof File
+                            ? URL.createObjectURL(p.line_profile_photo)
+                            : p.line_profile_photo
+                        }
+                        alt={`${p.line_name} profile`}
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    )}
+                    <p>
+                      Instagram:{" "}
+                      <a
+                        href={p.line_instagram_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500"
+                      >
+                        {p.line_instagram_link}
+                      </a>
+                    </p>
+                    <p>Time: {p.line_time}</p>
+                    <div className="space-x-2 mt-2">
+                      <button
+                        onClick={() => handleEditProfile(index)}
+                        className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProfile(index)}
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
             </div>
 
             <div className="space-y-4">
+
               <div className="flex bg-black rounded-lg">
-                <div className="w-[500px] h-[600px] bg-black rounded-md flex justify-center border border-gray-100 shadow-xl shadow-[#3e3e3e] items-center relative overflow-hidden transition-transform transform hover:scale-105">
-                  {/* Text Overlay */}
-                  <div className="absolute text-white text-xl font-semibold">
-                    {selectedImage ? "" : "Upload Your Event Flyer"}
+                {isCropperVisible ? (
+                  <ImageCropper
+                    image={selectedImage}
+                    onCropDone={handleCropDone}
+                    onCropCancel={handleCropCancel}
+                  />
+                ) : (
+                  <div className="w-[500px] h-[600px] bg-black rounded-md flex justify-center border border-gray-100 shadow-xl shadow-[#3e3e3e] items-center relative overflow-hidden transition-transform transform hover:scale-105">
+                    <div className="absolute text-white text-xl font-semibold">
+                      {selectedImage ? "" : "Upload Your Event Flyer"}
+                    </div>
+                    <img
+                      src={
+                        selectedImage ||
+                        "https://cdn.photoroom.com/v1/assets-cached.jpg?path=backgrounds_v3/black/Photoroom_black_background_extremely_fine_texture_only_black_co_bc8c725e-7ec8-4d6b-b024-98be7544d757.jpg"
+                      }
+                      alt="Event"
+                      className="object-cover w-full h-full"
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      onChange={handleImageChange}
+                    />
                   </div>
-
-                  {/* Image */}
-                  <img
-                    src={
-                      selectedImage ||
-                      "https://cdn.photoroom.com/v1/assets-cached.jpg?path=backgrounds_v3/black/Photoroom_black_background_extremely_fine_texture_only_black_co_bc8c725e-7ec8-4d6b-b024-98be7544d757.jpg"
-                    }
-                    alt="Event"
-                    className="object-cover w-full h-full"
-                  />
-
-                  {/* File Input */}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={handleImageChange}
-                  />
-                </div>
+                )}
               </div>
 
             </div>

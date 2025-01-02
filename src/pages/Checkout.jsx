@@ -130,7 +130,9 @@ const Checkout = () => {
 
   const calculateTotal = () => {
     const subtotal = count * selectedTicketPrice;
-    const platformFee = subtotal * 0.02;
+    const oragnizerTax = event.tax ? subtotal * (event.tax / 100) : subtotal
+    const platformFee = ((subtotal + oragnizerTax) * 0.09) + 0.89;
+    console.log(platformFee)
     let total = subtotal + platformFee;
     if (amount && type) {
       if (type === 'amount') {
@@ -304,8 +306,18 @@ const Checkout = () => {
           <span className="text-white">${(count * selectedTicketPrice).toFixed(2)}</span>
         </div>
         <div className="flex justify-between mb-3">
-          <span className="text-white">Platform Fee (2%)</span>
-          <span className="text-white">${(count * selectedTicketPrice * 0.02).toFixed(2)}</span>
+          <span className="text-white">Platform Fee (9%)</span>
+          {
+            event.tax ? (
+              <>
+                <span className="text-white">${((((count * selectedTicketPrice) * (count * selectedTicketPrice + event.tax/100)) * 0.09) + 0.89).toFixed(2)}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-white">${((count * selectedTicketPrice * 0.09) + 0.89).toFixed(2)}</span>
+              </>
+            )
+          }
         </div>
         <div className="border-t border-gray-600 my-3" />
         {

@@ -5,6 +5,7 @@ import axios from "axios";
 import url from "../../constants/url";
 import { FaCopy } from "react-icons/fa";
 import { MdCopyAll } from "react-icons/md";
+import ImageCropper from "../../components/features/Events/ImageCropper";
 
 const Profile = () => {
   const [copied, setCopied] = useState(false);
@@ -24,6 +25,8 @@ const Profile = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
 
+  const [isCropperCoverVisible, setCropperCoverVisible] = useState(false);
+  const [isCropperProfileVisible, setCropperProfileVisible] = useState(false);
 
   const handleCopy = (e) => {
     e.preventDefault();
@@ -111,15 +114,41 @@ const Profile = () => {
 
   const handleImageUpload = (event) => {
     const file_upload = event.target.files[0];
-    setProfilePhoto(file_upload)
+    //setProfilePhoto(file_upload)
 
     if (file_upload) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelectedImage(reader.result);
+        setCropperProfileVisible(true)
       };
       reader.readAsDataURL(file_upload);
     }
+  };
+
+  const handleProfileCropDone = async (croppedImage) => {
+    console.log("Cropped Image:", croppedImage);
+    try {
+      let croppedFile;
+      if (croppedImage.startsWith("data:image/")) {
+        croppedFile = dataURLtoFile(croppedImage, 'cropped-image.webp');
+      } else if (croppedImage.startsWith("blob:")) {
+        croppedFile = await blobURLToFile(croppedImage, 'cropped-image.webp');
+      }
+      if (croppedFile) {
+        setProfilePhoto(croppedFile);
+        setSelectedImage(URL.createObjectURL(croppedFile));
+      } else {
+        console.error("Failed to handle cropped image");
+      }
+    } catch (error) {
+      console.error("Error handling cropped image:", error);
+    }
+    setCropperProfileVisible(false);
+  };
+
+  const handleProfileCropCancel = () => {
+    setCropperProfileVisible(false);
   };
 
   const triggerFileInput = () => {
@@ -128,14 +157,69 @@ const Profile = () => {
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
-    setCoverImage(file)
+    //setCoverImage(file)
+
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewImage(reader.result);
+        setCropperCoverVisible(true)
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const dataURLtoFile = (dataurl, filename) => {
+    if (!dataurl || !dataurl.startsWith("data:image/")) {
+      console.error("Invalid data URL:", dataurl);
+      return null;
+    }
+
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
+  const blobURLToFile = async (blobURL, filename) => {
+    try {
+      const response = await fetch(blobURL);
+      const blob = await response.blob();
+      return new File([blob], filename, { type: blob.type });
+    } catch (error) {
+      console.error("Error converting blob URL to file:", error);
+      return null;
+    }
+  };
+
+  const handleCropDone = async (croppedImage) => {
+    console.log("Cropped Image:", croppedImage);
+    try {
+      let croppedFile;
+      if (croppedImage.startsWith("data:image/")) {
+        croppedFile = dataURLtoFile(croppedImage, 'cropped-image.webp');
+      } else if (croppedImage.startsWith("blob:")) {
+        croppedFile = await blobURLToFile(croppedImage, 'cropped-image.webp');
+      }
+      if (croppedFile) {
+        setCoverImage(croppedFile);
+        setPreviewImage(URL.createObjectURL(croppedFile));
+      } else {
+        console.error("Failed to handle cropped image");
+      }
+    } catch (error) {
+      console.error("Error handling cropped image:", error);
+    }
+    setCropperCoverVisible(false);
+  };
+
+  const handleCropCancel = () => {
+    setCropperCoverVisible(false);
   };
 
   return (
@@ -160,92 +244,114 @@ const Profile = () => {
                 <div className="border-b border-gray-900/10 pb-5">
                   <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                     <div className="col-span-full">
-                      <label
-                        htmlFor="file-upload"
-                        className="block text-sm font-medium text-gray-200"
-                      >
-                        Cover photo
-                      </label>
-                      <label
-                        htmlFor="file-upload"
-                        className="mt-2 flex justify-center items-center rounded-lg border border-dashed border-gray-200/25 px-6 py-10 cursor-pointer relative overflow-hidden"
-                        style={{ width: '100%', height: '250px' }}
-                      >
-                        {previewImage || organizer.cover_image ? (
-                          <img
-                            src={previewImage || organizer.cover_image}
-                            alt="Selected Cover"
-                            className="absolute inset-0 h-full w-full object-cover rounded-lg"
+                      {
+                        isCropperCoverVisible ? (
+                          <ImageCropper
+                            image={previewImage}
+                            onCropDone={handleCropDone}
+                            onCropCancel={handleCropCancel}
                           />
                         ) : (
-                          <div className="text-center">
-                            <svg
-                              className="mx-auto size-12 text-gray-300"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              aria-hidden="true"
+                          <>
+                            <label
+                              htmlFor="file-upload"
+                              className="block text-sm font-medium text-gray-200"
                             >
-                              <path
-                                fillRule="evenodd"
-                                d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
-                                clipRule="evenodd"
+                              Cover photo
+                            </label>
+                            <label
+                              htmlFor="file-upload"
+                              className="mt-2 flex justify-center items-center rounded-lg border border-dashed border-gray-200/25 px-6 py-10 cursor-pointer relative overflow-hidden"
+                              style={{ width: '100%', height: '250px' }}
+                            >
+                              {previewImage || organizer.cover_image ? (
+                                <img
+                                  src={previewImage || organizer.cover_image}
+                                  alt="Selected Cover"
+                                  className="absolute inset-0 h-full w-full object-cover rounded-lg"
+                                />
+                              ) : (
+                                <div className="text-center">
+                                  <svg
+                                    className="mx-auto size-12 text-gray-300"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    aria-hidden="true"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                  <div className="mt-4 flex text-sm/6 text-gray-600">
+                                    <span className="font-semibold text-indigo-600 hover:text-indigo-500">
+                                      Upload a file
+                                    </span>
+                                    <p className="pl-1">or drag and drop</p>
+                                  </div>
+                                  <p className="text-xs/5 text-gray-600">
+                                    PNG, JPG, GIF up to 10MB
+                                  </p>
+                                </div>
+                              )}
+                              <input
+                                id="file-upload"
+                                name="file-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="sr-only"
                               />
-                            </svg>
-                            <div className="mt-4 flex text-sm/6 text-gray-600">
-                              <span className="font-semibold text-indigo-600 hover:text-indigo-500">
-                                Upload a file
-                              </span>
-                              <p className="pl-1">or drag and drop</p>
-                            </div>
-                            <p className="text-xs/5 text-gray-600">
-                              PNG, JPG, GIF up to 10MB
-                            </p>
-                          </div>
-                        )}
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="sr-only"
-                        />
-                      </label>
+                            </label>
+                          </>
+                        )
+                      }
                     </div>
                     <div className="col-span-full">
                       <div className="flex items-center gap-x-3">
-                        <div onClick={triggerFileInput} className="cursor-pointer">
-                          {profilePhoto || organizer.profile_image ? (
-                            <img
-                              src={selectedImage || organizer.profile_image}
-                              alt="Profile"
-                              className="size-40 rounded-full object-cover"
+                        {
+                          isCropperProfileVisible ? (
+                            <ImageCropper
+                              image={selectedImage}
+                              onCropDone={handleProfileCropDone}
+                              onCropCancel={handleProfileCropCancel}
                             />
                           ) : (
-                            <svg
-                              className="size-40 text-gray-300"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              aria-hidden="true"
-                              data-slot="icon"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          )}
-                        </div>
+                            <div onClick={triggerFileInput} className="cursor-pointer">
+                              {profilePhoto || organizer.profile_image ? (
+                                <img
+                                  src={selectedImage || organizer.profile_image}
+                                  alt="Profile"
+                                  className="size-40 rounded-full object-cover"
+                                />
+                              ) : (
+                                <svg
+                                  className="size-40 text-gray-300"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  aria-hidden="true"
+                                  data-slot="icon"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+                          )
+                        }
                         <h3 className="text-white text-3xl flex items-center gap-x-2">
                           {organizer.name || ""}
-                          <button
+                          {/* <button
                             onClick={handleCopy}
                             className="p-1 rounded hover:bg-gray-700 focus:outline-none"
                             aria-label="Copy text"
                           >
                             <MdCopyAll size={22} />
-                          </button>
+                          </button> */}
                         </h3>
                       </div>
                       {/* Hidden file input */}
@@ -315,6 +421,13 @@ const Profile = () => {
                         />
                       </div>
                     </div>
+                    <button
+                      onClick={handleCopy}
+                      className="p-1 rounded focus:outline-none"
+                      aria-label="Copy text"
+                    >
+                      <MdCopyAll size={22} color="white" />
+                    </button>
                   </div>
                 </div>
                 <div className="border-b border-gray-900/10 pb-0 px-10">

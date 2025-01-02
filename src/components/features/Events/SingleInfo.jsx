@@ -203,8 +203,12 @@ const SingleInfo = () => {
 
               <div class="flex flex-wrap items-center justify-between text-white rounded-lg shadow-md">
                 <div class="flex items-center space-x-4">
-                  <div class="bg-gray-50 rounded-full overflow-hidden">
-                    <img className="size-20 rounded-full object-cover" src={event?.organizer_id?.profile_image || "https://cdn-icons-png.flaticon.com/512/6522/6522516.png"} />
+                  <div className="rounded-full overflow-hidden">
+                    <img
+                      className="size-24 rounded-full object-cover"
+                      src={event?.organizer_id?.profile_image || "https://cdn-icons-png.flaticon.com/512/6522/6522516.png"}
+                      alt="Profile"
+                    />
                   </div>
 
                   <div class="flex flex-col">

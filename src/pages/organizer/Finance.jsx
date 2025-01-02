@@ -42,7 +42,9 @@ const Finance = () => {
     pending: [],
   });
   const [transferedAmount, setTransferedAmount] = useState("")
-  const [payoutList, setPayoutList] = useState([])
+  const [payoutList, setPayoutList] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [inputAmount, setInputAmount] = useState("");
 
   const data = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
@@ -287,6 +289,22 @@ const Finance = () => {
     fetchEvents();
   }, [oragnizerId]);
 
+  const handlePayoutClick = () => {
+    try {
+      const payout = axios.post(`${url}/instant-payout`, {
+        account_id: accountId,
+        amount: inputAmount,
+        currency: "usd"
+      });
+      alert("Transfered successfully");
+      window.location.reload()
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error processing refund or updating status:", error);
+      alert("Instant Payout Failed. Please try again.");
+    }
+  };
+
   return (
     <>
       <div className="flex h-screen bg-black">
@@ -308,7 +326,7 @@ const Finance = () => {
             <>
               <div className="flex-1 flex flex-col p-10 overflow-y-auto no-scrollbar">
                 <div className="flex justify-between items-center mb-4">
-                  <h1 className="text-3xl font-semibold text-white">Finance</h1>
+                  <h1 className="text-3xl font-semibold text-white">Wallet</h1>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4">
                   <div className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
@@ -325,11 +343,11 @@ const Finance = () => {
                       </div>
                     </div>
                     <h3 className="mt-1 text-lg font-semibold text-gray-500">
-                      Available
+                      Balance
                     </h3>
                   </div>
 
-                  <div className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                  <div className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105" onClick={() => setShowModal(true)}>
                     <div className="flex justify-between items-center">
                       <div className="text-2xl font-bold text-gray-200">
                         ${accountBalance?.instant_available?.[0]?.amount ? accountBalance.instant_available[0].amount / 100 : 0}
@@ -343,9 +361,62 @@ const Finance = () => {
                       </div>
                     </div>
                     <h3 className="mt-1 text-lg font-semibold text-gray-500">
-                      Instant
+                      Available <br /><span className="hover:underline cursor-pointer">Instant Available: ${accountBalance?.instant_available?.[0]?.amount ? accountBalance.instant_available[0].amount / 100 : 0}</span>
                     </h3>
                   </div>
+                  {showModal && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                      <div className="bg-white rounded-lg shadow-lg p-6 w-1/3 relative">
+                        <div className="flex justify-between items-center mb-4">
+                          <h2 className="text-lg font-bold text-gray-800">Instant Payout (Max Limit: ${accountBalance?.instant_available[0]?.amount / 100})</h2>
+                          <button
+                            className="text-gray-500 hover:text-gray-800"
+                            onClick={() => setShowModal(false)}
+                          >
+                            X
+                          </button>
+                        </div>
+                        <div className="mb-4">
+                          <label htmlFor="payoutAmount" className="block text-sm font-medium text-gray-700 mb-1">
+                            Amount
+                          </label>
+                          <input
+                            type="number"
+                            id="payoutAmount"
+                            value={inputAmount}
+                            onChange={(e) => {
+                              const enteredAmount = e.target.value;
+                              const enteredAmountNum = parseFloat(enteredAmount);
+                              const maxAmount = accountBalance?.instant_available?.[0]?.amount / 100 || 0;
+                              if (enteredAmount === "") {
+                                setInputAmount("");
+                              } else if (!isNaN(enteredAmountNum) && enteredAmountNum <= maxAmount) {
+                                setInputAmount(enteredAmount);
+                              } else if (enteredAmountNum > maxAmount) {
+                                setInputAmount(maxAmount.toFixed(2));
+                              }
+                            }}
+                            className="w-full px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter amount"
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => setShowModal(false)}
+                            className="bg-red-800 text-white font-medium py-2 px-4 rounded-md hover:bg-red-900 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handlePayoutClick}
+                            className="bg-blue-800 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-900 transition-colors"
+                          >
+                            Payout
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* <div className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
                     <div className="flex justify-between items-center">
@@ -379,7 +450,7 @@ const Finance = () => {
                       </div>
                     </div>
                     <h3 className="mt-1 text-lg font-semibold text-gray-500">
-                      Transfered
+                      Total Payout
                     </h3>
                   </div>
                 </div>
@@ -467,16 +538,14 @@ const Finance = () => {
                               <p className="text-sm text-gray-400">{payout.created}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-lg font-medium">${(payout.amount / 100).toFixed(2)}</p>
+                              <p className="text-lg font-medium">${(payout.amount).toFixed(2)}</p>
                             </div>
                           </li>
                         );
                       })
                     )}
                   </ul>
-
                 </div>
-
               </div>
             </>
           )

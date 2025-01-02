@@ -80,7 +80,7 @@ const SidebarComponent = () => {
         />
         <SidebarItem
           icon={<BadgeDollarSign size={20} />}
-          text="Finance"
+          text="Wallet"
           link="/finance"
           active={location.pathname === "/finance"}
         />
