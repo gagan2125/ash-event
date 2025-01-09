@@ -130,15 +130,15 @@ const Checkout = () => {
 
   const calculateTotal = () => {
     const subtotal = count * selectedTicketPrice;
-    const oragnizerTax = event.tax ? subtotal * (event.tax / 100) : subtotal
-    const platformFee = ((subtotal + oragnizerTax) * 0.09) + 0.89;
-    console.log(platformFee)
+    const taxValue = parseFloat(event.tax) || 0;
+    const organizerTax = subtotal * (taxValue / 100);
+    const platformFee = ((subtotal + organizerTax) * 0.09) + 0.89;
     let total = subtotal + platformFee;
     if (amount && type) {
       if (type === 'amount') {
-        total -= parseFloat(amount);
+        total -= parseFloat(amount) || 0;
       } else if (type === 'percentage') {
-        const discount = (total * parseFloat(amount)) / 100;
+        const discount = (total * (parseFloat(amount) || 0)) / 100;
         total -= discount;
       }
     }
@@ -306,15 +306,23 @@ const Checkout = () => {
           <span className="text-white">${(count * selectedTicketPrice).toFixed(2)}</span>
         </div>
         <div className="flex justify-between mb-3">
-          <span className="text-white">Platform Fee (9%)</span>
+          <span className="text-white">Platform Fee</span>
           {
-            event.tax ? (
+            event.tax !== 'undefined' && typeof event.tax === 'number' ? (
               <>
-                <span className="text-white">${((((count * selectedTicketPrice) * (count * selectedTicketPrice + event.tax/100)) * 0.09) + 0.89).toFixed(2)}</span>
+                <span className="text-white">
+                  ${(
+                    (count * selectedTicketPrice) +
+                    ((count * selectedTicketPrice) * (event.tax / 100)) * 0.09 +
+                    0.89
+                  ).toFixed(2)}
+                </span>
               </>
             ) : (
               <>
-                <span className="text-white">${((count * selectedTicketPrice * 0.09) + 0.89).toFixed(2)}</span>
+                <span className="text-white">
+                  ${((count * selectedTicketPrice * 0.09) + 0.89).toFixed(2)}
+                </span>
               </>
             )
           }
