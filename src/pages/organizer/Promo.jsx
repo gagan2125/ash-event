@@ -119,7 +119,7 @@ const Promo = () => {
                             ))
                         ) : (
                             <div className="col-span-full text-center text-white text-lg">
-                                No tickets are available.
+                                No Promo Codes are available.
                             </div>
                         )}
                     </div>

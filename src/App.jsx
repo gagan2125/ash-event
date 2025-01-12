@@ -50,6 +50,7 @@ import EventCopy from "./pages/organizer/EventCopy";
 import Complimentary from "./pages/organizer/Complimentary";
 import Promo from "./pages/organizer/Promo";
 import Test from "./pages/Test";
+import Disputes from "./pages/organizer/Disputes";
 
 function App() {
   const location = useLocation();
@@ -87,7 +88,8 @@ function App() {
     '/choose-event',
     '/complimentary',
     '/promo',
-    '/test'
+    '/test',
+    '/disputes'
   ];
 
   const shouldHideNavbarAndFooter = hideNavbarAndFooterPaths.some((path) =>
@@ -150,6 +152,7 @@ function App() {
         <Route path="/event-copy/:id" element={<EventCopy />} />
         <Route path="/complimentary/:id" element={<Complimentary />} />
         <Route path="/promo/:id" element={<Promo />} />
+        <Route path="/disputes" element={<Disputes />} />
         <Route path="/test" element={<Test/>} />
       </Routes>
       {!shouldHideNavbarAndFooter && <Footer />}

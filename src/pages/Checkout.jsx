@@ -4,6 +4,7 @@ import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import axios from "axios";
 import url from "../constants/url";
 import { Button, Modal, Space } from 'antd';
+import { SelectOutlined } from "@ant-design/icons";
 
 const Checkout = () => {
   const location = useLocation();
@@ -101,6 +102,8 @@ const Checkout = () => {
     }
   }, [eventId]);
 
+  const ticket = event?.tickets?.find(ticket => ticket._id.toString() === selectedTicketId);
+
   useEffect(() => {
     const storedUserId = localStorage.getItem("userID");
     const storedOrganizerId = localStorage.getItem("organizerId");
@@ -165,6 +168,7 @@ const Checkout = () => {
         status: "pending",
         count: count,
         ticketId: selectedTicketId,
+        tickets: ticket,
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email
@@ -311,11 +315,9 @@ const Checkout = () => {
             event.tax !== 'undefined' && typeof event.tax === 'number' ? (
               <>
                 <span className="text-white">
-                  ${(
-                    (count * selectedTicketPrice) +
-                    ((count * selectedTicketPrice) * (event.tax / 100)) * 0.09 +
-                    0.89
-                  ).toFixed(2)}
+                  ${
+                    ((((count * selectedTicketPrice) + ((count * selectedTicketPrice) * (event.tax / 100))) * 0.09) + 0.89).toFixed(2)
+                  }
                 </span>
               </>
             ) : (

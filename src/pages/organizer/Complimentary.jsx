@@ -26,7 +26,7 @@ const Complimentary = () => {
 
             const response = await axios.post(`${url}/complimentary/add-complimentary`, payload);
 
-            if (response.status === 201) {
+            if (response.status === 200) {
                 alert('Ticket sent successfully!');
                 window.location.reload()
             } else {
@@ -111,7 +111,7 @@ const Complimentary = () => {
                             ))
                         ) : (
                             <div className="col-span-full text-center text-white text-lg">
-                                No tickets are available.
+                                No Complimentary tickets are available.
                             </div>
                         )}
                     </div>

@@ -454,6 +454,25 @@ const Finance = () => {
                     </h3>
                   </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 mt-2">
+                  <a href="/disputes" className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                    <div className="flex justify-between items-center">
+                      <div className="text-2xl font-bold text-gray-200">
+                        {accountBalance?.available?.[0]?.amount ? accountBalance.available[0].amount / 100 : 0}
+                      </div>
+
+                      <div className="flex space-x-2">
+                        <PiDotsThreeVertical
+                          size={24}
+                          className="text-white cursor-pointer hover:text-gray-200"
+                        />
+                      </div>
+                    </div>
+                    <h3 className="mt-1 text-lg font-semibold text-gray-500">
+                      Disputes
+                    </h3>
+                  </a>
+                </div>
                 <div className="bg-[#000] text-white p-6 rounded-lg shadow-md mt-6">
                   <div className="flex justify-between items-center mb-2">
                     <h2 className="text-3xl sm:text-2xl font-semibold">Finance Flow</h2>

@@ -114,7 +114,7 @@ const SingleInfo = () => {
 
   const increment = () => {
     setCount((prev) => {
-      if (selectedMaxTicket === 'undefined') {
+      if (selectedMaxTicket === 'undefined' || selectedMaxTicket === '') {
         return prev + 1;
       }
 
@@ -229,6 +229,18 @@ const SingleInfo = () => {
               {/* <p className="text-base font-semibold leading-7 text-secondary">
                 Fast Filling
               </p> */}
+              <div className="mt-10 flex justify-center md:hidden lg:justify-center lg:sticky lg:top-4 flex-col items-center lg:items-center">
+                <img
+                  alt=""
+                  src={`${event.flyer}`}
+                  className="w-[20rem] sm:w-[20rem] max-w-none rounded-xl bg-gray-900 shadow-xl ring-1 ring-gray-400/10"
+                />
+                <p className="mt-4 text-sm font-normal text-gray-100">
+                  ASH protects fans and artists from <br /> resellers. Tickets
+                  will be securely stored. <br />
+                </p>
+                {/* <p className="mt-4 text-md font-bold text-gray-100">Got a Code ?</p> */}
+              </div>
               <h1 className="mt-8 text-pretty text-4xl font-semibold tracking-tight text-gray-100 sm:text-5xl">
                 <span onClick={handleCopyLink} className="cursor-pointer hover:underline">{event.event_name}</span>
               </h1>
@@ -353,7 +365,7 @@ const SingleInfo = () => {
             }
           </div>
 
-          <div className="flex justify-center lg:justify-center lg:sticky lg:top-4 flex-col items-center lg:items-center">
+          <div className="flex justify-center hidden md:block lg:justify-center lg:sticky lg:top-4 flex-col items-center lg:items-center">
             <img
               alt=""
               src={`${event.flyer}`}
@@ -363,7 +375,7 @@ const SingleInfo = () => {
               ASH protects fans and artists from <br /> resellers. Tickets
               will be securely stored. <br />
             </p>
-            <p className="mt-4 text-md font-bold text-gray-100">Got a Code ?</p>
+            {/* <p className="mt-4 text-md font-bold text-gray-100">Got a Code ?</p> */}
           </div>
 
           {showPopup && (

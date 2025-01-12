@@ -12,6 +12,10 @@ import SidebarComponent from "../../components/layouts/SidebarComponent";
 import { X, ChevronDown } from 'lucide-react';
 import { useParams } from "react-router-dom";
 import ImageCropper from '../../components/features/Events/ImageCropper';
+import ReactMapGL, { GeolocateControl } from "react-map-gl";
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
+//import "mapbox-gl/dist/mapbox-gl.css";
+//import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
 const Create = () => {
   const { type } = useParams()
@@ -84,7 +88,7 @@ const Create = () => {
   const handleTaxChange = (e) => {
     const value = e.target.value;
     if (parseFloat(value) > 9.56) {
-      setTax('9.56'); 
+      setTax('9.56');
       setError("Tax can't be greater than 9.56");
     } else {
       setTax(value);

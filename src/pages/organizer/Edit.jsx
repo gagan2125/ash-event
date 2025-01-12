@@ -409,7 +409,7 @@ const Edit = () => {
         formData.append('end_date', endDate || event.end_date);
         formData.append('open_time', openTime || event.open_time);
         formData.append('category', category || event.category);
-        formData.append('tax', tax || event.tax);
+        formData.append('tax', tax);
         formData.append('venue_name', venueName || event.venue_name);
         formData.append('address', address || event.address);
         formData.append('event_description', eventDescription || event.event_description);
