@@ -227,12 +227,7 @@ const Eventinfo = () => {
             setBook(response.data);
 
             const total = response.data.reduce((acc, payout) => {
-                const ticket = payout?.party_id?.tickets.find(ticket => ticket._id === payout.ticketId && payout.refund === 'false');
-                const price = ticket?.price || 0;
-                const count = payout?.count || 0;
-                const tax = payout.refund === 'false' ? parseFloat(payout?.party_id?.tax) || 0 : 0;
-
-                const payoutAmount = ((price) + (tax / 100)).toFixed(2);
+                const payoutAmount = ((payout?.tickets?.price * payout.count) + (payout ? parseFloat(payout.tax || 0) / 100 : 0)).toFixed(2)
                 return acc + parseFloat(payoutAmount);
             }, 0);
             setTotalAmount(total);
@@ -499,7 +494,7 @@ const Eventinfo = () => {
                                                         </div>
                                                         <div className="text-right">
                                                             <p className="text-xl text-white font-medium mb-2">
-                                                                ${((payout?.tickets?.price * payout.count) + (parseFloat(payout?.party_id?.tax || 0) / 100)).toFixed(2)}
+                                                                ${((payout?.tickets?.price * payout.count) + (payout.tax ? parseFloat(payout?.tax || 0) / 100 : 0)).toFixed(2)}
                                                             </p>
                                                             <p className="text-sm text-gray-600 font-medium mb-2">{payout.qr_status === 'true' ? "Checked In" : ""}</p>
                                                             <div className="flex justify-between items-center gap-2 mt-3">

@@ -413,9 +413,10 @@ const Edit = () => {
         formData.append('venue_name', venueName || event.venue_name);
         formData.append('address', address || event.address);
         formData.append('event_description', eventDescription || event.event_description);
+        console.log("file", file)
         if (file) {
             formData.append('flyer', file);
-        } else {
+        } else if (event.flyer) {
             formData.append('flyer', event.flyer);
         }
 

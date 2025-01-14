@@ -458,7 +458,7 @@ const Finance = () => {
                   <a href="/disputes" className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
                     <div className="flex justify-between items-center">
                       <div className="text-2xl font-bold text-gray-200">
-                        {accountBalance?.available?.[0]?.amount ? accountBalance.available[0].amount / 100 : 0}
+                        0
                       </div>
 
                       <div className="flex space-x-2">
