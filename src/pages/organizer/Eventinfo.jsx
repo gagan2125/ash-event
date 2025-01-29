@@ -62,8 +62,29 @@ const Eventinfo = () => {
         amount: 0,
         paymentId: ""
     });
-    const [inputAmount, setInputAmount] = useState(0); // Temporary state for input
+    const [inputAmount, setInputAmount] = useState(0);
+    const [remain, setRemain] = useState([])
+    const [compCount, setCompCount] = useState(0)
 
+    const fetchRemainEvent = async (id) => {
+        try {
+            const response = await axios.get(`${url}/remain-tickets/${id}`);
+
+            if (response.data) {
+                setRemain(response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching remain events:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (id) {
+            fetchRemainEvent(id);
+        }
+    }, [id]);
+
+    const remainingTicketsSum = remain.reduce((sum, ticket) => sum + ticket.remaining_tickets, 0);
 
     const items = [
         {
@@ -226,11 +247,33 @@ const Eventinfo = () => {
             const response = await axios.get(`${url}/get-event-payment-list/${id}`);
             setBook(response.data);
 
+            // const total = response.data.reduce((acc, payout) => {
+            //     const payoutAmount = ((payout?.tickets?.price * payout.count) + (payout ? parseFloat(payout.tax || 0) / 100 : 0)).toFixed(2)
+            //     return acc + parseFloat(payoutAmount);
+            // }, 0);
+            // setTotalAmount(total);
+
             const total = response.data.reduce((acc, payout) => {
-                const payoutAmount = ((payout?.tickets?.price * payout.count) + (payout ? parseFloat(payout.tax || 0) / 100 : 0)).toFixed(2)
+                if (!payout.transaction_id) return acc;
+
+                const payoutAmount = (
+                    (payout?.tickets?.price * payout.count) +
+                    (payout.tax ? parseFloat(payout.tax || 0) / 100 : 0)
+                ).toFixed(2);
+
                 return acc + parseFloat(payoutAmount);
             }, 0);
             setTotalAmount(total);
+
+            const countEmptyTransactionId = response.data.reduce((count, payout) => {
+                if (!payout.transaction_id) {
+                    return count + 1;
+                }
+                return count;
+            }, 0);
+            console.log(countEmptyTransactionId)
+            setCompCount(countEmptyTransactionId)
+
 
 
             const soldTickets = response.data.reduce((acc, event) => acc + Number(event.count), 0);
@@ -440,7 +483,7 @@ const Eventinfo = () => {
                                     >
                                         <div className="flex justify-between items-center">
                                             <div className="text-2xl font-bold text-gray-200">
-                                                {totalQuantity - soldTickets || 0}
+                                                {remainingTicketsSum - compCount || 0}
                                             </div>
 
                                             <div className="flex space-x-2">
@@ -494,7 +537,11 @@ const Eventinfo = () => {
                                                         </div>
                                                         <div className="text-right">
                                                             <p className="text-xl text-white font-medium mb-2">
-                                                                ${((payout?.tickets?.price * payout.count) + (payout.tax ? parseFloat(payout?.tax || 0) / 100 : 0)).toFixed(2)}
+                                                                ${!payout?.transaction_id ? "0" :
+                                                                    `${(
+                                                                        (payout?.tickets?.price * payout.count) +
+                                                                        (payout.tax ? parseFloat(payout?.tax || 0) / 100 : 0)
+                                                                    ).toFixed(2)}$`}
                                                             </p>
                                                             <p className="text-sm text-gray-600 font-medium mb-2">{payout.qr_status === 'true' ? "Checked In" : ""}</p>
                                                             <div className="flex justify-between items-center gap-2 mt-3">
