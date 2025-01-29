@@ -30,6 +30,7 @@ const Edit = () => {
     const [startPrice, setStartPrice] = useState("");
     const [venueName, setVenueName] = useState("");
     const [address, setAddress] = useState("");
+    const [mapLink, setMapLink] = useState("");
     const [category, setCategory] = useState("")
     const [tax, setTax] = useState("");
     const [errorTax, setErrorTax] = useState('');
@@ -364,7 +365,17 @@ const Edit = () => {
         setIsOpen((prev) => !prev);
     };
 
+    const generateUniqueCode = () => {
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+        for (let i = 0; i < 6; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    };
+
     const formattedTickets = tickets.map((ticket) => ({
+        ticket_id: ticket.ticket_id || generateUniqueCode(),
         ticket_name: ticket.ticketName || ticket.ticket_name,
         qty: ticket.quantity || ticket.qty,
         price: ticket.price || 0,
@@ -412,6 +423,7 @@ const Edit = () => {
         formData.append('tax', tax);
         formData.append('venue_name', venueName || event.venue_name);
         formData.append('address', address || event.address);
+        formData.append('map_link', mapLink || event.map_link);
         formData.append('event_description', eventDescription || event.event_description);
         console.log("file", file)
         if (file) {
@@ -729,6 +741,15 @@ const Edit = () => {
                                     placeholder="Enter Address"
                                     value={address || event.address}
                                     onChange={(e) => setAddress(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <input
+                                    type="text"
+                                    className="p-3 w-full bg-black rounded-md focus:outline-none text-white border border-[#5d5d5d] focus:border-[#ccc] shadow-lg shadow-[#3f3f3f] focus:shadow-md focus:shadow-white"
+                                    placeholder="Enter Google Map URL"
+                                    value={mapLink || event.map_link}
+                                    onChange={(e) => setMapLink(e.target.value)}
                                 />
                             </div>
                             {/* <div className="flex items-center space-x-4 mt-10">
