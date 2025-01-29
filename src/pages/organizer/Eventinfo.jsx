@@ -541,7 +541,7 @@ const Eventinfo = () => {
                                                                     `${(
                                                                         (payout?.tickets?.price * payout.count) +
                                                                         (payout.tax ? parseFloat(payout?.tax || 0) / 100 : 0)
-                                                                    ).toFixed(2)}$`}
+                                                                    ).toFixed(2)}`}
                                                             </p>
                                                             <p className="text-sm text-gray-600 font-medium mb-2">{payout.qr_status === 'true' ? "Checked In" : ""}</p>
                                                             <div className="flex justify-between items-center gap-2 mt-3">
