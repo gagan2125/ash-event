@@ -25,7 +25,7 @@ const Hero = () => {
                   <span className="animated-gradient-text">
                     {words[currentWordIndex]}
                   </span>{" "}
-                  <br /> OF YOUR LIKE!
+                  <br /> OF YOUR LIKE
                 </h1>
                 <p className="mt-4 text-xl text-gray-300">
                   Incredible live shows. Upfront pricing. Relevant
