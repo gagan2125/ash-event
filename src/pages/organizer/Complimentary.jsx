@@ -16,6 +16,7 @@ const Complimentary = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentDateTime, setCurrentDateTime] = useState("");
+    const [selectedTickets, setSelectedTickets] = useState([]);
 
     const handleSendTickets = async () => {
         try {
@@ -26,7 +27,8 @@ const Complimentary = () => {
                 email,
                 ticket_id: selectedTicket,
                 qty: quantity,
-                date: currentDateTime
+                date: currentDateTime,
+                tickets: selectedTickets,
             };
 
             const response = await axios.post(`${url}/complimentary/add-complimentary`, payload);
@@ -89,6 +91,20 @@ const Complimentary = () => {
         });
         setCurrentDateTime(now);
     }, []);
+
+    const handleTicketChange = (e) => {
+        const selectedTicketId = e.target.value;
+        setSelectedTicket(selectedTicketId);
+
+        const selectedTicketObj = ticket.find((t) => t._id === selectedTicketId);
+        setSelectedTickets(selectedTicketObj)
+
+        // if (selectedTicketObj && selectedTicketObj.complimentary) {
+        //     console.log("Complimentary ticket selected:", selectedTicketObj);
+        // } else {
+        //     console.log("Non-complimentary ticket selected:", selectedTicketObj);
+        // }
+    };
 
     return (
         <>
@@ -166,7 +182,7 @@ const Complimentary = () => {
                                     <select
                                         id="ticket"
                                         value={selectedTicket}
-                                        onChange={(e) => setSelectedTicket(e.target.value)}
+                                        onChange={handleTicketChange}
                                         className="mt-1 block w-full p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                     >
                                         <option value="" disabled>
