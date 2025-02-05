@@ -15,6 +15,7 @@ const Complimentary = () => {
 
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [currentDateTime, setCurrentDateTime] = useState("");
 
     const handleSendTickets = async () => {
         try {
@@ -25,6 +26,7 @@ const Complimentary = () => {
                 email,
                 ticket_id: selectedTicket,
                 qty: quantity,
+                date: currentDateTime
             };
 
             const response = await axios.post(`${url}/complimentary/add-complimentary`, payload);
@@ -74,6 +76,19 @@ const Complimentary = () => {
         fetchEvent();
         fetchEvents();
     }, [id]);
+
+    useEffect(() => {
+        const now = new Date().toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+        });
+        setCurrentDateTime(now);
+    }, []);
 
     return (
         <>

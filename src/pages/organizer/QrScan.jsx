@@ -2,27 +2,31 @@ import React, { useState } from "react";
 import QrScanner from "react-qr-scanner";
 import axios from "axios";
 import url from "../../constants/url";
+import { Spin } from "antd";
 
 const QrScan = () => {
     const [data, setData] = useState(null);
     const [isScanning, setIsScanning] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [facingMode, setFacingMode] = useState(
         /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? "environment" : "user"
     );
 
     const handleScan = async (result) => {
-        if (result) {
+        if (result && isScanning) {
+            setIsScanning(false);
+            setLoading(true);
             try {
                 const parsedData = JSON.parse(result.text);
-                const { paymentIntentId } = parsedData;
+                const { qrcode } = parsedData;
 
                 const response = await fetch(`${url}/fetchDataByQRCode`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ transaction_id: paymentIntentId }),
+                    body: JSON.stringify({ qrcode_number: qrcode }),
                 });
 
                 const fetchedData = await response.json();
@@ -34,6 +38,8 @@ const QrScan = () => {
             } catch (error) {
                 console.error('Error fetching data:', error);
                 setData({ error: 'Invalid QR Code data' });
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -48,7 +54,7 @@ const QrScan = () => {
     };
 
     const handleSave = async () => {
-        console.log(data.payment)
+        console.log(data.payment);
         if (data?.payment?._id) {
             try {
                 const response = await axios.post(`${url}/updateQRCodeStatus`, {
@@ -57,7 +63,7 @@ const QrScan = () => {
 
                 if (response.status === 200) {
                     alert("QR Code status updated successfully!");
-                    window.location.reload()
+                    window.location.reload();
                     setData((prevData) => ({
                         ...prevData,
                         payment: {
@@ -74,7 +80,6 @@ const QrScan = () => {
             }
         }
     };
-
 
     return (
         <div className="flex bg-black justify-center min-h-screen">
@@ -93,7 +98,10 @@ const QrScan = () => {
                             />
                         </div>
                         <div className="flex justify-between px-4">
-                            <a href="/org-event" className="mt-4 text-white text-sm rounded transition hover:underline">
+                            <a
+                                href="/org-event"
+                                className="mt-4 text-white text-sm rounded transition hover:underline"
+                            >
                                 Back
                             </a>
                             <button
@@ -116,7 +124,9 @@ const QrScan = () => {
 
                 <div className="mt-10 text-white px-4">
                     {error && <p className="text-red-500">{error}</p>}
-                    {data ? (
+                    {loading ? (
+                        <Spin tip="Loading..." />
+                    ) : data ? (
                         data.error ? (
                             <p>{data.error}</p>
                         ) : (
@@ -130,7 +140,9 @@ const QrScan = () => {
                                             </tr>
                                             <tr>
                                                 <td className="border-b border-gray-800 px-4 py-2 font-medium">Amount</td>
-                                                <td className="border-b border-gray-800 px-4 py-2">${(data.payment.amount / 100).toFixed(2) || "N/A"}</td>
+                                                <td className="border-b border-gray-800 px-4 py-2">
+                                                    ${(data.payment.amount / 100).toFixed(2) || "N/A"}
+                                                </td>
                                             </tr>
                                         </>
                                     )}
@@ -144,7 +156,13 @@ const QrScan = () => {
                                         <>
                                             <tr>
                                                 <td className="border-b border-gray-800 px-4 py-2 font-medium">Name</td>
-                                                <td className="border-b border-gray-800 px-4 py-2">{data.user.firstName || "N/A"} {data.user.lastName || "N/A"}</td>
+                                                <td className="border-b border-gray-800 px-4 py-2">
+                                                    {data.user.firstName || "Complimentary"} {data.user.lastName || "Ticket"}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="border-b border-gray-800 px-4 py-2 font-medium">Email id</td>
+                                                <td className="border-b border-gray-800 px-4 py-2">{data.payment.email || "N/A"}</td>
                                             </tr>
                                             <tr>
                                                 <td className="border-b border-gray-800 px-4 py-2 font-medium">Phone Number</td>
@@ -160,13 +178,20 @@ const QrScan = () => {
                     )}
                 </div>
 
-                {data?.payment?.qr_status === 'false' && data && (
+                {data?.payment?.qr_status === 'false' && data ? (
                     <button
                         onClick={handleSave}
                         className="mt-4 bg-gray-100 text-black py-1 px-2 rounded hover:bg-gray-300"
                     >
                         Done
                     </button>
+                ) : data ? (
+                    <>
+                        <p className="text-white mt-5">Already scanned</p>
+                        <button onClick={() => window.location.reload()} className="text-black text-sm px-4 py-1 bg-yellow-600 hover:bg-yellow-500 rounded-full mt-2">Rescan</button>
+                    </>
+                ): (
+                    ""
                 )}
             </div>
         </div>
