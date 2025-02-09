@@ -11,7 +11,11 @@ const Promo = () => {
     const [code, setCode] = useState('');
     const [ticket, setTicket] = useState([]);
     const [selectedTicket, setSelectedTicket] = useState('');
+    const [selectedPromo, setSelectedPromo] = useState("");
     const [quantity, setQuantity] = useState(0);
+    const [limitedQty, setLimitedQty] = useState(0);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     const [tickets, setTickets] = useState([]);
 
@@ -31,12 +35,20 @@ const Promo = () => {
     }, []);
 
     const handleSendTickets = async () => {
+        // if(!code || !selectedTicket || !selectedPromo || startDate || endDate){
+        //     alert("Please fill the below details")
+        //     return 
+        // }
         try {
             const payload = {
                 event_id: id,
                 code,
                 type: selectedTicket,
                 amount: quantity,
+                limit: selectedPromo,
+                limit_count: limitedQty || 0,
+                start_date: startDate,
+                end_date: endDate,
             };
 
             const response = await axios.post(`${url}/promo/add-promo`, payload);
@@ -142,8 +154,78 @@ const Promo = () => {
                                         onChange={(e) => setCode(e.target.value)}
                                         className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm border focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                         placeholder="Promo Code"
-                                        readOnly
                                     />
+                                </div>
+                                <div className="mb-4">
+                                    <label
+                                        htmlFor="ticket"
+                                        className="block text-sm font-medium text-gray-700"
+                                    >
+                                        Select Limit
+                                    </label>
+                                    <select
+                                        id="ticket"
+                                        value={selectedPromo}
+                                        onChange={(e) => setSelectedPromo(e.target.value)}
+                                        className="mt-1 block w-full p-2 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    >
+                                        <option value="" disabled>
+                                            Choose a Limit
+                                        </option>
+                                        <option value="limited">
+                                            Limited
+                                        </option>
+                                        <option value="unlimited">
+                                            Unlimited
+                                        </option>
+                                    </select>
+                                </div>
+                                {selectedPromo === "limited" && (
+                                    <div className="mb-4">
+                                        <label
+                                            htmlFor="quantity"
+                                            className="block text-sm font-medium text-gray-700 capitalize"
+                                        >
+                                            Limited Count
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="limitedQty"
+                                            value={limitedQty}
+                                            onChange={(e) => {
+                                                const newQuantity = e.target.value;
+                                                setLimitedQty(newQuantity);
+                                            }}
+                                            className="mt-1 p-2 block border w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            min="1"
+                                        />
+                                    </div>
+                                )}
+                                <div className="mb-4 flex flex-wrap -mx-2">
+                                    <div className="w-full sm:w-1/2 px-2">
+                                        <label htmlFor="start-date" className="block text-sm font-medium text-gray-700">
+                                            Start Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            id="start-date"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        />
+                                    </div>
+                                    <div className="w-full sm:w-1/2 px-2">
+                                        <label htmlFor="end-date" className="block text-sm font-medium text-gray-700">
+                                            End Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            id="end-date"
+                                            value={endDate}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        />
+                                    </div>
                                 </div>
                                 <div className="mb-4">
                                     <label
