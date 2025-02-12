@@ -65,6 +65,8 @@ const Eventinfo = () => {
     const [inputAmount, setInputAmount] = useState(0);
     const [remain, setRemain] = useState([])
     const [compCount, setCompCount] = useState(0)
+    const [remainCount, setRemainCount] = useState(0);
+    //const [remain, setRemain] = useState([])
 
     const fetchRemainEvent = async (id) => {
         try {
@@ -73,6 +75,10 @@ const Eventinfo = () => {
             if (response.data) {
                 setRemain(response.data);
             }
+            const soldTickets = response.data.reduce((acc, event) => acc + Number(event.tickets_sold), 0);
+            setSoldTickets(soldTickets);
+            const remains = response.data.reduce((acc, event) => acc + Number(event.remaining_tickets), 0);
+            setRemainCount(remains)
         } catch (error) {
             console.error("Error fetching remain events:", error);
         }
@@ -274,10 +280,6 @@ const Eventinfo = () => {
             console.log(countEmptyTransactionId)
             setCompCount(countEmptyTransactionId)
 
-
-
-            const soldTickets = response.data.reduce((acc, event) => acc + Number(event.count), 0);
-            setSoldTickets(soldTickets)
         } catch (error) {
             console.error('Error fetching events:', error);
         } finally {
@@ -315,7 +317,7 @@ const Eventinfo = () => {
     const handleRefundClick = (payout) => {
         console.log(payout)
         const ticketId = payout.ticketId;
-        const matchingParty = payout?.party_id?.tickets?.find(party => party._id === ticketId);
+        const matchingParty = payout?.tickets
 
         const ticketPrice = payout.count * matchingParty.price;
 
@@ -417,7 +419,7 @@ const Eventinfo = () => {
                                         </Dropdown>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-8">
                                     <div
                                         className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
                                     >
@@ -438,7 +440,7 @@ const Eventinfo = () => {
                                         </h3>
                                     </div>
 
-                                    <div
+                                    {/* <div
                                         className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
                                     >
                                         <div className="flex justify-between items-center">
@@ -456,7 +458,7 @@ const Eventinfo = () => {
                                         <h3 className="mt-1 text-lg font-semibold text-gray-500">
                                             Attendes
                                         </h3>
-                                    </div>
+                                    </div> */}
 
                                     <div
                                         className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
@@ -483,7 +485,7 @@ const Eventinfo = () => {
                                     >
                                         <div className="flex justify-between items-center">
                                             <div className="text-2xl font-bold text-gray-200">
-                                                {remainingTicketsSum - compCount || 0}
+                                                {remainCount || 0}
                                             </div>
 
                                             <div className="flex space-x-2">
@@ -497,6 +499,46 @@ const Eventinfo = () => {
                                             Remaining
                                         </h3>
                                     </div>
+                                </div>
+                                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+                                    {
+                                        remain.map((data, index) => {
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="p-4 bg-black border border-[#2f2f2f] hover:border-[#585858] rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:scale-105"
+                                                >
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="text-2xl font-bold text-gray-200">
+                                                            {
+                                                                data.total_qty === 0 ?
+                                                                    (
+                                                                        <>
+                                                                            {data.tickets_sold} / {data.tickets_sold} <span className="text-xs font-medium">sold out</span>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            {data.remaining_tickets} / {data.total_qty} <span className="text-xs font-medium">remaining</span>
+                                                                        </>
+                                                                    )
+                                                            }
+                                                        </div>
+
+                                                        <div className="flex space-x-2">
+                                                            <PiDotsThreeVertical
+                                                                size={24}
+                                                                className="text-white cursor-pointer hover:text-gray-200"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <h3 className="mt-1 text-lg font-semibold text-gray-500">
+                                                        {data.ticket_name}
+                                                    </h3>
+                                                </div>
+                                            );
+                                        })
+
+                                    }
                                 </div>
                                 <h2 className="text-xl text-white font-semibold mb-4 mt-10 flex items-center justify-between">
                                     Bookings
@@ -639,7 +681,8 @@ const Eventinfo = () => {
                                         </div>
                                         <div className="flex justify-end">
                                             <button
-                                                onClick={handleRefund}
+                                                //onClick={handleRefund}
+                                                onClick={() => {}}
                                                 className="bg-red-800 text-white font-medium py-2 px-4 rounded-md hover:bg-red-900 transition-colors"
                                             >
                                                 Refund
