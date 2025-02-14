@@ -13,20 +13,56 @@ const QrScan = () => {
         /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? "environment" : "user"
     );
 
+    // const handleScan = async (result) => {
+    //     if (result && isScanning) {
+    //         setIsScanning(false);
+    //         setLoading(true);
+    //         try {
+    //             const parsedData = JSON.parse(result.text);
+    //             const { qrcode } = parsedData;
+
+    //             const response = await fetch(`${url}/fetchDataByQRCode`, {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 },
+    //                 body: JSON.stringify({ qrcode_number: qrcode }),
+    //             });
+
+    //             const fetchedData = await response.json();
+    //             if (response.ok) {
+    //                 setData(fetchedData);
+    //             } else {
+    //                 setData({ error: fetchedData.error });
+    //             }
+    //         } catch (error) {
+    //             console.error('Error fetching data:', error);
+    //             setData({ error: 'Invalid QR Code data' });
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     }
+    // };
+
     const handleScan = async (result) => {
         if (result && isScanning) {
             setIsScanning(false);
             setLoading(true);
             try {
                 const parsedData = JSON.parse(result.text);
-                const { qrcode } = parsedData;
+                console.log(parsedData)
+                const { paymentIntentId, qrcode } = parsedData;
+
+                const requestData = paymentIntentId
+                    ? { paymentIntentId: paymentIntentId }
+                    : { qrcode_number: qrcode };
 
                 const response = await fetch(`${url}/fetchDataByQRCode`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ qrcode_number: qrcode }),
+                    body: JSON.stringify(requestData),
                 });
 
                 const fetchedData = await response.json();
@@ -207,7 +243,7 @@ const QrScan = () => {
                     </>
                 ) : data ? (
                     <>
-                        <p className="text-red-600 font-bold mt-5">Already checked-in</p>
+                        {!data.error && <p className="text-red-600 font-bold mt-5">Already checked-in</p> }
                         <button onClick={
                             () => {
                                 setData(null)
