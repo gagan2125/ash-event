@@ -36,7 +36,6 @@ const Profile = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-
   useEffect(() => {
     const loadFromLocalStorage = () => {
       const storedUserOrganizerId = localStorage.getItem('organizerId');

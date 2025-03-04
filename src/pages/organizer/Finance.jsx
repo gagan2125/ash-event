@@ -76,6 +76,7 @@ const Finance = () => {
     },
   };
   const tabs = ["All", "Live", "Past", "Draft", "Cancelled"];
+  
   const cardsData = [
     {
       id: 1,

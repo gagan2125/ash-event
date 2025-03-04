@@ -46,6 +46,15 @@ const TicketInfo = () => {
         ? formatDate(payment.party_id.start_date)
         : { formattedDate: 'Not Available', time: '' };
 
+    const { formattedDate: formattedDateBook, time: timebook } = payment?.party_id
+        ? formatDate(payment.createdAt)
+        : { formattedDate: 'Not Available', time: '' };
+
+    const { formattedDate: formattedDateCheck, time: timeCheck } = payment?.party_id
+        ? formatDate(payment.updatedAt)
+        : { formattedDate: 'Not Available', time: '' };
+
+
     const formatDated = (dateString) => {
         const date = new Date(dateString);
         const formattedDate = new Intl.DateTimeFormat('en-GB', {
@@ -136,15 +145,24 @@ const TicketInfo = () => {
                         </p>
                         <p className="text-white mb-3">
                             <span className="text-sm text-gray-300">Booking Date:</span>{" "}
-                            {payment && payment.date
-                                ? formatDated(payment.date)
-                                : 'Not Available'}
+                            {payment?.party_id ? `${formattedDateBook}` : 'Not Available'}
+                            {timebook && `, ${timebook}`}
                         </p>
                         <p className='text-white mb-3'>
                             <span className='text-sm text-gray-300'>Ticket Status:</span>{" "}
                             {payment
                                 ? `${payment.qr_status === 'true' ? 'Checked In' : "Not Checked In"}`
                                 : 'Not Available'}
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <h1 className='text-lg text-gray-500 mt-5 underline'>Check in Information</h1>
+                    <div className='flex justify-between items-center mt-5 gap-10'>
+                        <p className='text-white mt-5 mb-3'>
+                            <span className='text-sm text-gray-300'>Checked in TIme:</span>
+                            {payment?.party_id ? `${formattedDateCheck}` : 'Not Available'}
+                            {timeCheck && `, ${timeCheck}`}
                         </p>
                     </div>
                 </div>
