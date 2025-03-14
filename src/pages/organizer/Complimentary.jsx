@@ -8,6 +8,8 @@ import axios from 'axios';
 const Complimentary = () => {
     const { id } = useParams()
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [ticket, setTicket] = useState([]);
     const [selectedTicket, setSelectedTicket] = useState('');
@@ -29,6 +31,8 @@ const Complimentary = () => {
                 qty: quantity,
                 date: currentDateTime,
                 tickets: selectedTickets,
+                firstName: firstName,
+                lastName: lastName
             };
 
             const response = await axios.post(`${url}/complimentary/add-complimentary`, payload);
@@ -156,6 +160,38 @@ const Complimentary = () => {
                         <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
                             <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
                                 <h2 className="text-xl font-semibold mb-4">Send Tickets</h2>
+                                <div className="mb-4">
+                                    <label
+                                        htmlFor="email"
+                                        className="block text-sm font-medium text-gray-700"
+                                    >
+                                        First Name
+                                    </label>
+                                    <input
+                                        type="firstName"
+                                        id="firstName"
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm border focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        placeholder="Enter First Name"
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label
+                                        htmlFor="email"
+                                        className="block text-sm font-medium text-gray-700"
+                                    >
+                                        Last Name
+                                    </label>
+                                    <input
+                                        type="lastName"
+                                        id="lastName"
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm border focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        placeholder="Enter Last Name"
+                                    />
+                                </div>
                                 <div className="mb-4">
                                     <label
                                         htmlFor="email"
